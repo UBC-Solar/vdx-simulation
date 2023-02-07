@@ -3,8 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <functional>
-#include <cmath>
 #include <iterator>
+#include <cmath>
 
 const double S_PI = 3.14159265358979323846;
 const double S_GR = 9.81;
