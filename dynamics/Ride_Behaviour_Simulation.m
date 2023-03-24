@@ -170,7 +170,11 @@ if abs(body_roll) > abs(max_roll_angle)
 end
 
 %verify body pitch
-
+body_pitch_angle = atan((braking_displacement_wheel_front+braking_displacement_wheel_rear)/wheelBase); %inputs[in] output[rad]
+body_pitch = aeroFrontOverhang*sin(body_pitch_angle);
+if  body_pitch > 12*rideHeight
+    disp("WARNING: body pitch is more than maximum - car eats shit")
+end
 
 %wheel displacement check to see if they are within range (1-2inch)
 if (cornering_displacement_wheel_front > 2.05 || cornering_displacement_wheel_front < 0.95)|| (cornering_displacement_wheel_rear > 2.05 || cornering_displacement_wheel_rear < 0.95)
