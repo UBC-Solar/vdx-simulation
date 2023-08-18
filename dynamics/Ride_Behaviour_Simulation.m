@@ -85,7 +85,7 @@ a_x = data.InputFront(8); %[g] max braking acceleration from suspension loading 
 LoLT = w_total*CG_height*a_x/wheelBase; %[lbs] assuming laterally centered CG
 
 %estimate roll rates based on desired roll gradient (initial constraint) and front/rear roll
-%moment distribution 
+%moment distribution
 k_roll_total = w_total*CG_NRA/roll_gradient; %inputs[lbs, ft, rad/g] output[lb.ft/rad] **removed (-)
 k_roll_front = k_roll_total * k_roll_dstr_front; %inputs[lb.ft/rad, %] output[lb.ft/rad]
 k_roll_rear = k_roll_total - k_roll_front; %inputs[lb.ft/rad] output[lb.ft/rad]
