@@ -13,7 +13,7 @@ TireOD = 566; %mm
 tireRotOffset = 52; % KPI lateral offeset from tire edge mm
 CGX = 0; %mm
 CGY = 3; %mm
-CGZ = 380; %mm
+CGZ = 480; %mm
 bankAngle = 45; %degrees
 r = 8.5; %figure-8 radius m
 t = 8; %figure-8 time s
@@ -24,7 +24,7 @@ insideAngle = atand(L/(R-TFront/2));
 outsideAngle = atand(L/(R+TFront/2));
 
 %Calculate laterial acc required during figure 8
-aFig8 = (4*pi^2*r/t^2)/9.81;
+aFig8 = (4*pi^2*r/t^2)/9.81
 
 %Calculate max capable braking/accleration force
 LongLT=0.5;
