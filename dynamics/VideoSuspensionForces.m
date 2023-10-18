@@ -1,4 +1,5 @@
-% Script written by Graeme Dockrill, 2022
+% Author: Graeme Dockrill, 2022
+% Modified by Liam Foster, 2023
 % This script takes an excel file 'setup.xlsx' and plots the suspension
 % system in 3D and calculates the forces in each member
 
@@ -48,6 +49,16 @@ z = 3;
 % Extracts balljoint coordinates from VideoSuspensionForcesSetup.xlsx
 exceltable = readtable('VideoSuspensionForcesSetup','NumHeaderLines',19);
 coordinates = table2array(exceltable);
+
+
+ID = '1UxrHRz9iydKkYqhXAQWLDXY1FJoSzHCgv_TjBJgwtKQ';
+sheet_name = 'Hardpoints';
+url_name = sprintf('https://docs.google.com/spreadsheets/d/%s/gviz/tq?tqx=out:csv&sheet=%s',...
+    ID, sheet_name);
+data = webread(url_name);
+
+%% 
+
 
 % Converting values read from excel to 3D points
 O = coordinates(x:z,1);
