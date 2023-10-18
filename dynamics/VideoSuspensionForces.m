@@ -50,16 +50,6 @@ z = 3;
 exceltable = readtable('VideoSuspensionForcesSetup','NumHeaderLines',19);
 coordinates = table2array(exceltable);
 
-
-ID = '1UxrHRz9iydKkYqhXAQWLDXY1FJoSzHCgv_TjBJgwtKQ';
-sheet_name = 'Hardpoints';
-url_name = sprintf('https://docs.google.com/spreadsheets/d/%s/gviz/tq?tqx=out:csv&sheet=%s',...
-    ID, sheet_name);
-data = webread(url_name);
-
-%% 
-
-
 % Converting values read from excel to 3D points
 O = coordinates(x:z,1);
 I_LCA_R = coordinates(x:z,2);
