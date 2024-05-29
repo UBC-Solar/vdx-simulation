@@ -5,6 +5,7 @@ classdef SuspensionCorner
             "UCA_IF","UCA_O","PR_O","PR_I","RP","RS","SC","TR_O","TR_I",...
             "WC","TP"],VariableNames=["X","Y","Z"]);
 
+        % Variables for each coordinate
         O (3,1) double {mustBeReal, mustBeFinite};          % Coordinate system origin
         MC (3,1) double {mustBeReal, mustBeFinite};         % Moment center (typically same as origin)
         LCA_IR (3,1) double {mustBeReal, mustBeFinite};     % LCA inboard rear rod end
@@ -21,9 +22,9 @@ classdef SuspensionCorner
         TR_O (3,1) double {mustBeReal, mustBeFinite};       % Steering tie-rod outboard rod end
         TR_I (3,1) double {mustBeReal, mustBeFinite};       % Steering tie-rod inboard rod end
         WC (3,1) double {mustBeReal, mustBeFinite};         % Wheel center
-        TP (3,1) double {mustBeReal, mustBeFinite};         % Tire contact patch    
-    end
-    properties (Dependent)
+        TP (3,1) double {mustBeReal, mustBeFinite};         % Tire contact patch
+
+        % Coordinate matrices to represent each component
         LCA (3,3) double {mustBeReal, mustBeFinite};        
         UCA (3,3) double {mustBeReal, mustBeFinite};
         PR (3,2) double {mustBeReal, mustBeFinite};
@@ -31,10 +32,11 @@ classdef SuspensionCorner
         S (3,2) double {mustBeReal, mustBeFinite};
         TR (3,2) double {mustBeReal, mustBeFinite};
         W (3,100) double {mustBeReal, mustBeFinite};
-
     end
+    
     properties (Constant)
         x = 1; y = 2; z = 3;
+        
     end
     methods
         function obj = SuspensionCorner(coords)
@@ -65,26 +67,111 @@ classdef SuspensionCorner
                 obj.S = [obj.RS obj.SC];
                 obj.TR = [obj.TR_O obj.TR_I];
                 t = linspace(0,2*pi);
-                obj.W = [norm([0.45-obj.WC(2) obj.WC(3)])*sin(t) + obj.WC(1);
+                obj.W = [norm([0.45-abs(obj.WC(2)) obj.WC(3)])*sin(t) + obj.WC(1);
                          0*t + obj.WC(2);
-                         norm([0.45-obj.WC(2) obj.WC(3)])*cos(t) + obj.WC(3)];
+                         norm([0.45-abs(obj.WC(2)) obj.WC(3)])*cos(t) + obj.WC(3)];
             end
         end
         
-        function corner = plotCorner(corner,fig,lineWidth,scaleFactor)
-            figure(fig)
-            scatter3(corner.Coords,"X","Y","Z",'filled','SizeData',hardpointsize,'Marker','o','MarkerFaceColor','blue')
-            line(corner.LCA(:,corner.x), corner.LCA(:,corner.y), corner.LCA(:,corner.z), 'Color','blue','LineWidth',lineWidth);
-            line(corner.UCA(:,corner.x), corner.UCA(:,corner.y), corner.UCA(:,corner.z),'Color','blue', 'LineWidth', lineWidth);
-            line(corner.PR(:,corner.x), corner.PR(:,corner.y), corner.PR(:,corner.z),'Color','black', 'LineWidth', lineWidth);
-            line(corner.R(:,corner.x), corner.R(:,corner.y), corner.R(:,corner.z) ,'Color','black', 'LineWidth', lineWidth);
-            line(corner.S(:,corner.x), corner.S(:,corner.y), corner.S(:,corner.z) ,'Color','black','LineWidth', lineWidth);
-            line(corner.TR(:,corner.x), corner.TR(:,corner.y), corner.TR(:,corner.z) ,'Color','green','LineWidth', lineWidth);
-            plot3(corner.W(corner.x,:),corner.W(corner.y,:),corner.W(corner.z,:), 'Color', 'red', 'LineWidth', lineWidth)
+        function corner = plotCorner(corner,fig,hardpointsize,lineWidth)
+            if nargin > 3
+                figure(fig)
+                if fig.Children ~= 0
+                    hold on
+                end
+                scatter3(corner.Coords,"X","Y","Z",'filled','SizeData',hardpointsize,'Marker','o','MarkerFaceColor','blue')
+                hold on
+                line(corner.LCA(corner.x,:),corner.LCA(corner.y,:),corner.LCA(corner.z,:),'Color','blue','LineWidth',lineWidth);
+                line(corner.UCA(corner.x,:),corner.UCA(corner.y,:),corner.UCA(corner.z,:),'Color','blue','LineWidth',lineWidth);
+                line(corner.PR(corner.x,:),corner.PR(corner.y,:),corner.PR(corner.z,:),'Color','black','LineWidth',lineWidth);
+                line(corner.R(corner.x,:),corner.R(corner.y,:),corner.R(corner.z,:),'Color','black','LineWidth',lineWidth);
+                line(corner.S(corner.x,:),corner.S(corner.y,:),corner.S(corner.z,:),'Color','black','LineWidth',lineWidth);
+                line(corner.TR(corner.x,:),corner.TR(corner.y,:),corner.TR(corner.z,:),'Color','green','LineWidth',lineWidth);
+                plot3(corner.W(corner.x,:),corner.W(corner.y,:),corner.W(corner.z,:),'Color','red','LineWidth',lineWidth)
+                hold off
+                xlabel('x (m)');
+                ylabel('y (m)');
+                zlabel('z (m)');
+                axis equal
+            end
         end
 
-        function fout = SuspensionCorner.calcForces(loadCase)
-            if nargin > 0
+        function F_Out = calcForces(corner,F_TP)
+            if nargin > 1
+
+                % Calculate unit vectors for force direction in each 
+                % linkage
+                u_LCA_F = (corner.LCA_O-corner.LCA_IF)/(norm(corner.LCA_O-corner.LCA_IF));
+                u_LCA_R = (corner.LCA_O-corner.LCA_IR)/(norm(corner.LCA_O-corner.LCA_IR));
+                u_UCA_F = (corner.UCA_O-corner.UCA_IF)/(norm(corner.UCA_O-corner.UCA_IF));
+                u_UCA_R = (corner.UCA_O-corner.UCA_IR)/(norm(corner.UCA_O-corner.UCA_IR));
+                u_PR = (corner.PR_O-corner.PR_I)/(norm(corner.PR_O-corner.PR_I));
+                u_S = (corner.SC-corner.RS)/(norm(corner.SC-corner.RS));
+                u_TR = (corner.TR_O-corner.TR_I)/(norm(corner.TR_O-corner.TR_I));
+                
+                % Calculate moment arms for each chassis point
+                d_LCA_IR = corner.LCA_IR-corner.MC;
+                d_LCA_IF = corner.LCA_IF-corner.MC;
+                d_UCA_IR = corner.UCA_IR-corner.MC;
+                d_UCA_IF = corner.UCA_IF-corner.MC;
+                d_TR_I = corner.TR_I-corner.MC;
+                d_PR_I = corner.PR_I-corner.MC;
+                d_TP = corner.TP-corner.MC;
+
+                % Calculate unit moment vectors for each chassis point
+                % using force unit vectors and moment arms
+                uM_UCA_IF = cross(d_UCA_IF, u_UCA_F);
+                uM_UCA_IR = cross(d_UCA_IR, u_UCA_R);
+                uM_LCA_IF = cross(d_LCA_IF, u_LCA_F);
+                uM_LCA_IR = cross(d_LCA_IR, u_LCA_R);
+                uM_PR = cross(d_PR_I, u_PR);
+                uM_TR = cross(d_TR_I, u_TR);
+
+                % Calculate moments due to input force at tire contact
+                % patch
+                M_TP = cross(d_TP,F_TP);
+
+                % A*F_mag = B
+                % Construct A and B matrices
+                A = [u_UCA_F,  u_UCA_R,  u_LCA_F,  u_LCA_R,  u_PR, u_TR;
+                     uM_UCA_IF,uM_UCA_IR,uM_LCA_IF,uM_LCA_IR,uM_PR,uM_TR];
+
+                B = [-F_TP';
+                     -M_TP'];
+
+                % Find F_mag as A^-1*B or A/B
+                F_mag = A/B;
+
+                % Multiply each force magnitude by its unit vector to find
+                % force vectors
+                F_UCA_F = F_mag(1)*u_FL_UCA_F;
+                F_UCA_R = F_mag(2)*u_FL_UCA_R;
+                F_LCA_F = F_mag(3)*u_FL_LCA_F;
+                F_LCA_R = F_mag(4)*u_FL_LCA_R;
+                F_PR = F_mag(5)*u_FL_PR;
+                F_TR = F_mag(6)*u_FL_TR;
+
+                % Forces at upright balljoints
+                F_UCA_O = F_UCA_F + F_UCA_R + F_PR;
+                F_LCA_O = F_LCA_F + F_LCA_R;
+
+                % Calculate forces in rocker by moving moment center to
+                % rocker pivot
+                d_FL_RP_PR = F_PR_I - F_RP;
+                d_FL_RP_RS = F_RS - F_RP;
+
+                F_Out = cell2table({"FL" "UCA Front" F_UCA_F; 
+                                    "FL" "UCA Rear" F_UCA_R;
+                                    "FL" "UCA Balljoint" F_UCA_O; 
+                                    "FL" "LCA Front" F_LCA_F;
+                                    "FL" "LCA Rear" F_LCA_R;
+                                    "FL" "LCA Balljoint" F_LCA_O;
+                                    "FL" "Pullrod" F_PR;
+                                    "FL" "Pullrod along rocker" [F_PR_Rx F_PR_Ry 0];
+                                    "FL" "Rocker pivot" F_RP';
+                                    "FL" "Rocker pivot radial/axial" [F_RP_radial F_RP_axial 0]; 
+                                    "FL" "Shock" F_S;
+                                    "FL" "Steering Tie-rod" F_TR});
 
             end
         end
