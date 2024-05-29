@@ -144,34 +144,80 @@ classdef SuspensionCorner
 
                 % Multiply each force magnitude by its unit vector to find
                 % force vectors
-                F_UCA_F = F_mag(1)*u_FL_UCA_F;
-                F_UCA_R = F_mag(2)*u_FL_UCA_R;
-                F_LCA_F = F_mag(3)*u_FL_LCA_F;
-                F_LCA_R = F_mag(4)*u_FL_LCA_R;
-                F_PR = F_mag(5)*u_FL_PR;
-                F_TR = F_mag(6)*u_FL_TR;
+                F_UCA_F = F_mag(1)*u_UCA_F;
+                F_UCA_R = F_mag(2)*u_UCA_R;
+                F_LCA_F = F_mag(3)*u_LCA_F;
+                F_LCA_R = F_mag(4)*u_LCA_R;
+                F_PR = F_mag(5)*u_PR;
+                F_TR = F_mag(6)*u_TR;
 
                 % Forces at upright balljoints
                 F_UCA_O = F_UCA_F + F_UCA_R + F_PR;
                 F_LCA_O = F_LCA_F + F_LCA_R;
 
-                % Calculate forces in rocker by moving moment center to
-                % rocker pivot
-                d_FL_RP_PR = F_PR_I - F_RP;
-                d_FL_RP_RS = F_RS - F_RP;
+                %% Calculate forces in rocker
+                % Transformation matrix from base frame to FL rocker frame
+                n_R = cross(corner.R(:,1)-corner.R(:,2), ...
+                            corner.R(:,3)-corner.R(:,2));   % Find vector normal to rocker plane by tkaing cross product of rocker arms
+                u3_R = (n_R/norm(n_R))';                    % Unit normal (u3)
+                u1_R = ((corner.R(:,3)-corner.R(:,1))/ ...
+                    norm(corner.R(:,3)-corner.R(:,1)))';    % Set unit X vector (u1) as difference between rocker-shock point and rocker-pull-rod point
+                u2_R = cross(u3_R,u1_R);                    % Set unit Y vector (u2) as cross product of u1 and u3
+                R_Transform = [u1_R;                        % Rocker coordinate transformation matrix
+                               u2_R;
+                               u3_R];
+                % Transform the relevant already existing vectors
+                u_RP_S = R_Transform*u_S;
+                F_RP_PR = R_Transform*F_PR;
 
-                F_Out = cell2table({"FL" "UCA Front" F_UCA_F; 
-                                    "FL" "UCA Rear" F_UCA_R;
-                                    "FL" "UCA Balljoint" F_UCA_O; 
-                                    "FL" "LCA Front" F_LCA_F;
-                                    "FL" "LCA Rear" F_LCA_R;
-                                    "FL" "LCA Balljoint" F_LCA_O;
-                                    "FL" "Pullrod" F_PR;
-                                    "FL" "Pullrod along rocker" [F_PR_Rx F_PR_Ry 0];
-                                    "FL" "Rocker pivot" F_RP';
-                                    "FL" "Rocker pivot radial/axial" [F_RP_radial F_RP_axial 0]; 
-                                    "FL" "Shock" F_S;
-                                    "FL" "Steering Tie-rod" F_TR});
+                % Calculate new moment arms as distance from point to 
+                % rocker pivot
+                d_RP_PR = R_Transform*(F_PR_I - F_RP);
+                d_RP_RS = R_Transform*(F_RS - F_RP);
+
+                % Moment about rocker pivot from pullrod input force
+                M_RP_PR = R_Transform*cross(d_RP_PR, F_RP_PR);
+                
+                % Moment unit vectors about rocker pivot for shock
+                uM_RP_RS = R_Transform*cross(d_RP_RS, u_S);
+                
+                % Setting up matrix and solving
+                RP_A = [1 0 0 0 0 u_RP_S(corner.x)
+                        0 1 0 0 0 u_RP_S(corner.y)
+                        0 0 1 0 0 u_RP_S(corner.z)
+                        0 0 0 1 0 uM_RP_RS(corner.x)
+                        0 0 0 0 1 uM_RP_RS(corner.y)
+                        0 0 0 0 0 uM_RP_RS(corner.z)];
+                RP_B = [-F_RP_PR; -M_RP_PR];
+                F_RP_mag = RP_A\RP_B;
+                
+                F_RP = F_RP_mag(1:3);
+                M_RP = [F_RP_mag(4:5); 0];
+                F_S = F_RP_mag(6)*u_S;
+                
+                % Finding axial and radial components of the rocker pivot force
+                F_RP_radial = norm(F_RP - (dot((F_RP-corner.R(:,2)),u3_R') * u3_R));
+                F_RP_axial = norm(dot((F_RP-corner.R(:,2)),u3_R') * u3_R);
+                
+                % Finding components of pull-rod force along rocker dims
+                u_Rx = (corner.R(:,3)-corner.R(:,1))/norm(corner.R(:,3)-corner.R(:,1));
+                u_Ry = cross(u3_R,u_Rx);
+                F_PR_Rx = dot(F_PR,u_Rx);
+                F_PR_Ry = dot(F_PR,u_Ry);
+                F_PR_Rz = dot(F_PR,u3_R);
+
+                F_Out = cell2table({"UCA Front" F_UCA_F; 
+                                    "UCA Rear" F_UCA_R;
+                                    "UCA Balljoint" F_UCA_O; 
+                                    "LCA Front" F_LCA_F;
+                                    "LCA Rear" F_LCA_R;
+                                    "LCA Balljoint" F_LCA_O;
+                                    "Pullrod" F_PR;
+                                    "Pullrod along rocker" [F_PR_Rx F_PR_Ry 0];
+                                    "Rocker pivot" F_RP';
+                                    "Rocker pivot radial/axial" [F_RP_radial F_RP_axial 0]; 
+                                    "Shock" F_S;
+                                    "Steering Tie-rod" F_TR});
 
             end
         end
