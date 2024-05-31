@@ -140,7 +140,7 @@ classdef SuspensionCorner
                      -M_TP'];
 
                 % Find F_mag as A^-1*B or A/B
-                F_mag = A/B;
+                F_mag = A\B;
 
                 % Multiply each force magnitude by its unit vector to find
                 % force vectors
@@ -172,14 +172,14 @@ classdef SuspensionCorner
 
                 % Calculate new moment arms as distance from point to 
                 % rocker pivot
-                d_RP_PR = R_Transform*(F_PR_I - F_RP);
-                d_RP_RS = R_Transform*(F_RS - F_RP);
+                d_RP_PR = R_Transform*(corner.PR_I - corner.RP);
+                d_RP_RS = R_Transform*(corner.RS - corner.RP);
 
                 % Moment about rocker pivot from pullrod input force
                 M_RP_PR = R_Transform*cross(d_RP_PR, F_RP_PR);
                 
                 % Moment unit vectors about rocker pivot for shock
-                uM_RP_RS = R_Transform*cross(d_RP_RS, u_S);
+                uM_RP_RS = R_Transform*cross(d_RP_RS, u_RP_S);
                 
                 % Setting up matrix and solving
                 RP_A = [1 0 0 0 0 u_RP_S(corner.x)
@@ -191,34 +191,31 @@ classdef SuspensionCorner
                 RP_B = [-F_RP_PR; -M_RP_PR];
                 F_RP_mag = RP_A\RP_B;
                 
-                F_RP = F_RP_mag(1:3);
-                M_RP = [F_RP_mag(4:5); 0];
-                F_S = F_RP_mag(6)*u_S;
-                
-                % Finding axial and radial components of the rocker pivot force
-                F_RP_radial = norm(F_RP - (dot((F_RP-corner.R(:,2)),u3_R') * u3_R));
-                F_RP_axial = norm(dot((F_RP-corner.R(:,2)),u3_R') * u3_R);
-                
-                % Finding components of pull-rod force along rocker dims
-                u_Rx = (corner.R(:,3)-corner.R(:,1))/norm(corner.R(:,3)-corner.R(:,1));
-                u_Ry = cross(u3_R,u_Rx);
-                F_PR_Rx = dot(F_PR,u_Rx);
-                F_PR_Ry = dot(F_PR,u_Ry);
-                F_PR_Rz = dot(F_PR,u3_R);
+                F_RP_RP = F_RP_mag(1:3);
+                M_RP_RP = [F_RP_mag(4:5); 0];
+                F_RP_S = F_RP_mag(6)*u_S;
 
-                F_Out = cell2table({"UCA Front" F_UCA_F; 
-                                    "UCA Rear" F_UCA_R;
-                                    "UCA Balljoint" F_UCA_O; 
-                                    "LCA Front" F_LCA_F;
-                                    "LCA Rear" F_LCA_R;
-                                    "LCA Balljoint" F_LCA_O;
-                                    "Pullrod" F_PR;
-                                    "Pullrod along rocker" [F_PR_Rx F_PR_Ry 0];
+                F_RP = R_Transform\F_RP_RP;
+                M_RP = R_Transform\M_RP_RP;
+                F_S = R_Transform\F_RP_S;
+                
+
+                F_Out = cell2table({"UCA Front" F_UCA_F'; 
+                                    "UCA Rear" F_UCA_R';
+                                    "UCA Balljoint" F_UCA_O'; 
+                                    "LCA Front" F_LCA_F';
+                                    "LCA Rear" F_LCA_R';
+                                    "LCA Balljoint" F_LCA_O';
+                                    "Steering Tie-rod" F_TR';
+                                    "Pull-rod" F_PR';
                                     "Rocker pivot" F_RP';
-                                    "Rocker pivot radial/axial" [F_RP_radial F_RP_axial 0]; 
-                                    "Shock" F_S;
-                                    "Steering Tie-rod" F_TR});
-
+                                    "Rocker pivot moment" M_RP';
+                                    "Shock" F_S';
+                                    "Rocker Coords - Rocker Pivot" F_RP_RP';
+                                    "Rocker Coords - Rocker Pivot Moment" M_RP_RP';
+                                    "Rocker Coords - Pull-rod" F_RP_PR';
+                                    "Rocker Coords - Shock" F_RP_S'},...
+                                    "VariableNames",{'Member/Point','Force/Moment'});
             end
         end
     end
