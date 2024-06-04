@@ -195,7 +195,7 @@ classdef SuspensionCorner
                 
                 F_RP_RP = F_RP_mag(1:3);
                 M_RP_RP = [F_RP_mag(4:5); 0];
-                F_RP_S = F_RP_mag(6)*u_S;
+                F_RP_S = F_RP_mag(6)*u_RP_S;
 
                 F_RP = R_Transform\F_RP_RP;
                 M_RP = R_Transform\M_RP_RP;
