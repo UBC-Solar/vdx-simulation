@@ -220,6 +220,22 @@ classdef SuspensionCorner
                 quiver3(plotCoords(:,corner.x),plotCoords(:,corner.y),plotCoords(:,corner.z),...
                         corner.F_Out{[1:9,11],'X'},corner.F_Out{[1:9,11],'Y'},corner.F_Out{[1:9,11],'Z'}, ...
                         'color','red','AutoScaleFactor',lineScaleFactor,'LineWidth',lineWidth);
+%                 % plotting Force vector along bottom rear member
+%                 quiver3(F_LCA_IR(x), F_LCA_IR(y), F_LCA_IR(z), f_FL_LCA_R(x), f_FL_LCA_R(y), f_FL_LCA_R(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along top front member
+%                 quiver3(F_UCA_IF(x), F_UCA_IF(y), F_UCA_IF(z), f_FL_UCA_F(x), f_FL_UCA_F(y), f_FL_UCA_F(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along top rear member
+%                 quiver3(F_UCA_IR(x), F_UCA_IR(y), F_UCA_IR(z), f_FL_UCA_R(x), f_FL_UCA_R(y), f_FL_UCA_R(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along shock member
+%                 quiver3(F_PR_I(x), F_PR_I(y), F_PR_I(z), f_FL_PR(x), f_FL_PR(y), f_FL_PR(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along tie rod
+%                 quiver3(F_TR_I(x), F_TR_I(y), F_TR_I(z), f_FL_TR(x), f_FL_TR(y), f_FL_TR(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along pull rod
+%                 quiver3(F_PR_I(x), F_PR_I(y), F_PR_I(z), f_FL_PR(x), f_FL_PR(y), f_FL_PR(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector for rocker pivot
+%                 quiver3(F_RP(x), F_RP(y), F_RP(z), f_FL_RP(x), f_FL_RP(y), f_FL_RP(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
+%                 % plotting Force vector along shock
+%                 quiver3(F_SC(x), F_SC(y), F_SC(z), f_FL_S(x), f_FL_S(y), f_FL_S(z), 'color', 'red', 'AutoScaleFactor', forcevect_scalefactor, 'LineWidth', forcevect_linewidth);
                 hold off
             end
         end
