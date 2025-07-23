@@ -1,4 +1,4 @@
-classdef carV4
+classdef carV3
     properties (Constant)
         % see ISO 8855 for coordinate systems etc.
 
@@ -6,13 +6,13 @@ classdef carV4
         g = 9.80665                     % m/s²
 
         % Car
-        Wheelbase = 2550                % mm
-        Trackwidth = 1270               % mm
-        RawMass = 220                   % kg
+        Wheelbase = 1820                % mm
+        Trackwidth = 900                % mm
+        RawMass = 270                   % kg
         MinDriverMass = 80              % kg
-        CoGx = 0.55                     % along wheelbase
+        CoGx = 0.53                     % along wheelbase
         CoGy = 0.5                      % along trackwidth
-        CoGh = 600                      % mm
+        CoGh = 450                      % mm
 
         % Motor
         NominalMotorPower = 1470        % W
@@ -21,14 +21,14 @@ classdef carV4
 
         % Rack & Pinion (Stiletto C42-340 12:1)
         RPwidth = (11.25) * 25.4        % inch → mm
-        RPratio = (12) * 25.4           % inch/rev → mm/rev
+        RPratio = (2.618) * 25.4        % inch/rev → mm/rev
         RPmaxTravel = (4+5/8) * 25.4    % inch → mm
 
         % Wheel (Battlax SC 100/80-16 M/C 50P TL)
         WheelRadius = 566/2             % mm
         WheelCurvature = 54             % mm (radius)
         TirePressure = 65 / 145         % psi → N/mm²
-        WheelStiffness = 115             % N/mm
+        WheelStiffness = 115            % N/mm (50?)
 
         % Driving Surface
         RoadCrown = deg2rad(2)          % radians
