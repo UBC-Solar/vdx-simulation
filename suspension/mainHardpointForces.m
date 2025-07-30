@@ -5,54 +5,17 @@ clear, close, clc
 %% Getting coordinates from google sheet
 run("getCoordinatesV3.m")
 
-%% Setup
-% Choose turn direction
-TurnDir = -1; %Left: -1 %Right: 1
-% Choose loading in gs (*9.81m/s^2)
-BrakeLoadCase = 1;
-CornerLoadCase = 1;
-BumpLoadCase = 2;
-%% Other Parameters
-g = 9.81; % acceleration of gravity
-
-% global origin is halfway between front and back of the car and down a bit
-% from the carsim one
-% carsim origin if for front and back and halfway between the wheels.
+%% Set Loading Condition
+%regs: 1g turn, 2g bump, 1g braking
+bumpG = 2 %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+brakeG = 1
+cornerG = 1
+turnDirection = 1;
+% 1 right, -1 left
 
 
-% % Taken from SW VDX Skeleton and CG Estimate (March 25,2025)
-% COM_sw = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
-% totalMass = 354.37; %kg
-% trackWidth = 1270; %mm
-% wheelBase = 2550; %mm
-% RBias = COM_sw(3)/wheelBase; % [mm/mm] static bias on rear wheels
-% BrakeLoadTransfer = COM_sw(2)/wheelBase;
-% CornerLoadTransfer = COM_sw(2)/trackWidth;
-
-% Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
-COM_sw = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
-totalMass = 354.37; %kg
-trackWidth = 1270; %mm %*updated
-wheelBase = 2750; %mm %*updated
-RBias = COM_sw(3)/wheelBase; % [mm/mm] static bias on rear wheels
-BrakeLoadTransfer = COM_sw(2)/wheelBase;
-CornerLoadTransfer = COM_sw(2)/trackWidth;
-
-%% Calculate Tire Contact Patch Location
-tireRadius = 283; %mm
-p_TP = [p_WC(1), p_WC(2), p_WC(3)-tireRadius];
-
-%% Static Weights
-wS_F = totalMass*(1-RBias)/2; % Static weight on each front wheel [kg]
-
-%% Dynamic Weights
-% Calculating dynamic weights on each wheel accounting for weight transfer effects [kg]
-wD_FL_TP = wS_F*(1+BrakeLoadCase*BrakeLoadTransfer)*(1+CornerLoadCase*CornerLoadTransfer*TurnDir);
-
-%% Tire Patch Forces
-% Front left
-% Calculating loads on each wheel according to the load cases [N]
-f_FL_TP = wD_FL_TP*g.*[BrakeLoadCase CornerLoadCase BumpLoadCase];
+%% Get Calculate Forces at Tire Patch
+run("tirePatchForces.m");
 
 %% Direction Vectors
 u_tieRod = pTR_in - pTR_out;
@@ -63,7 +26,6 @@ u_UCA_out = pC_UCA_out - pU_UCA;
 u_PR = pR_PR - pUCA_PR;
 
 %% Plotting
-run("getCoordinatesV2.m")
 clc; clf
 figure(1)
 v1=[0,0,0]; v2=[0,2,2];
@@ -81,6 +43,7 @@ drawLink(pU_UCA, u_UCA_out, "UCA_{out}", 'k')
 drawLink(pUCA_PR, u_PR, "PR", 'cyan')
 
 % Plot wheel center and tire patch
+tireRadius = norm(p_WC-p_TP);
 scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
 scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
 drawCircle(p_WC, [0,1,0], tireRadius, "Tire", "k")
