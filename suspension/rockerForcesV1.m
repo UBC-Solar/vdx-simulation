@@ -1,6 +1,4 @@
 %% Rocker Force Analysis
-%clear; close; clc
-x = 1; y = 2; z = 3;
 
 % Assumming rocker plane is parallel to the YZ plane (x constant)
 
@@ -30,8 +28,8 @@ u_S = (pC_S - pR_C)/norm(pC_S - pR_C);
 FR = AR\bR;
 
 % Rocker-Chassis Force, Rocker Shock Force
-F_RC = [0, FR(1), FR(2)]
-F_S = FR(3)*u_S 
+F_RC = [0, FR(1), FR(2)];
+F_S = FR(3)*u_S; 
 
 
 %% Plotting

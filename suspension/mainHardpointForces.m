@@ -1,135 +1,99 @@
-% Calcualting Hardpoint forces Main script %
-clear, close, clc
+%% MAIN SCRIPT TO CALULATE HARDPOINT FORCES %%
+clear, close, clc, clf % clears workspace, closes figures, clears terminal, clear figure
+x = 1; y = 2; z = 3; % for clarity
+
+%%%%%% Set Loading Condition here! %%%%%%
+%regs: 1g turn, 2g bump, 1g braking
+bumpG = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+brakeG = 1;
+cornerG = 1;
+turnDirection = 1; %right
+%turnDirection = -1 %left
+
+%%%%%% Set side to compute and plot %%%%%
+side = "Right"; % (coordiante driving primary side)
+%side = "Left";
+%side = "Both";
+
+% (choose only Right or Left side to have forces table copied to clipboard to paste
+% to google docs)
 
 
-%% Getting coordinates from google sheet
+%%%%%% Vehicle Paramters %%%%%%
+
+% Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
+COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
+totalMass = 354.37; %kg
+trackWidth = 1270; %mm
+wheelBase = 2750; %mm
+g = 9.81; % gravatiational acceleration
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DO NOT EDIT BELOW:
+% Running Routines to Obtain Hardpoint Forces %
+
+% Getting coordinates from google sheet SW Hardpoints tab of V4 Vehicle
+% Dynamics sheet
 run("getCoordinatesV3.m")
 
-%% Set Loading Condition
-%regs: 1g turn, 2g bump, 1g braking
-bumpG = 2 %bump should >= 1 (no bump would be bumpG = 1 for static weight)
-brakeG = 1
-cornerG = 1
-turnDirection = 1;
-% 1 right, -1 left
-
-
-%% Get Calculate Forces at Tire Patch
-run("tirePatchForces.m");
-
-%% Direction Vectors
-u_tieRod = pTR_in - pTR_out;
-u_LCA_in = pC_LCA_in - pU_LCA; %inboard was front and outboard was rear
-u_LCA_out = pC_LCA_out - pU_LCA; 
-u_UCA_in = pC_UCA_in - pU_UCA;
-u_UCA_out = pC_UCA_out - pU_UCA;
-u_PR = pR_PR - pUCA_PR;
-
-%% Plotting
-clc; clf
+% Setting up figure
 figure(1)
-v1=[0,0,0]; v2=[0,2,2];
-grid on; axis equal;
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Solar VDX Suspension');
-%subtitle('Driver Left Side')
+subtitle(sprintf('Front %s Side(s)', side))
+grid on; axis equal
 hold on;
-
-drawLink(pTR_out, u_tieRod, "TR", "r")
-drawLink(pU_LCA, u_LCA_in, "LCA_{in}", 'b')
-drawLink(pU_LCA, u_LCA_out, "LCA_{out}", 'g')
-drawLink(pU_UCA, u_UCA_in, "UCA_{in}", 'm')
-drawLink(pU_UCA, u_UCA_out, "UCA_{out}", 'k')
-drawLink(pUCA_PR, u_PR, "PR", 'cyan')
-
-% Plot wheel center and tire patch
-tireRadius = norm(p_WC-p_TP);
-scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
-scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
-drawCircle(p_WC, [0,1,0], tireRadius, "Tire", "k")
-
 legend show;
 view(3); % Set 3D view
 
-% Normalizing;
-u_tieRod = u_tieRod/norm(u_tieRod);
-u_LCA_in = u_LCA_in/norm(u_LCA_in);
-u_LCA_out = u_LCA_out/norm(u_LCA_out);
-u_UCA_in = u_UCA_in/norm(u_UCA_in);
-u_UCA_out = u_UCA_out/norm(u_UCA_out);
-u_PR = u_PR/norm(u_PR);
+% Calculate Forces at Tire Patch
+run("tirePatchForces.m");
 
-%% Calculate Moment Arms from each chassis point
-MC = p_O; % moment center setting as origin for now
-%WILL NEED TO BE A DATA FIELD LATER FOR CORNER (SINCE DIFFERNET FOR FRONT AND BACK)
-d_tr = (pTR_in - p_O);
-d_bf_low = (pC_LCA_in - p_O);
-d_br_low = (pC_LCA_out - p_O);
-d_bf_up = (pC_UCA_in - p_O);
-d_br_up = (pC_UCA_out - p_O);
-d_st = (pR_PR - p_O);
+if side == "Right" || side == "Both"
 
+    disp("Right side Forces displyed in Newtons")
 
-%% Calculate momemnt unit vectors for each chassis point 
-% using the moment arms and force unit vectors
-uM_tr = cross(d_tr, u_tieRod);
-uM_bf_low = cross(d_bf_low, u_LCA_in);
-uM_br_low = cross(d_br_low, u_LCA_out);
-uM_bf_up = cross(d_br_up, u_UCA_in);
-uM_br_up = cross(d_br_up, u_UCA_out);
-uM_st = cross(d_st, u_PR);
+    % Primary Coordiante Side
 
-%% Calcualte moment due to input force at tire contact patch
-d_TP = (p_TP - MC)/1000;
-M_TP = cross(d_TP, f_FL_TP);
+    % Solve static forces system and plot suspension
+    run("solveStaticSystem.m")
+    
+    displayVectorComponents(forceNames)
+end
 
-%% Solve the system (Ax = b)
+if side == "Left" || side == "Both"
+    disp("Left side Forces displyed in Newtons")
+    % Secondary Coordiante Side
+    % negating the Y component
+    for i = 1:numel(symbols)
+        var = evalin('base', symbols(i));
+        assignin('base',symbols(i),[var(1), -var(2), var(3)])
+    end
+    clear var;
+    % Solve static forces system and plot suspension
+    run("solveStaticSystem.m")
+    displayVectorComponents(forceNames)
+    
+end
 
-A = [u_tieRod', u_LCA_in', u_LCA_out', u_UCA_in', u_UCA_out', u_PR';
-    uM_tr'/1000, uM_bf_low'/1000, uM_bf_low'/1000, uM_br_low'/1000, uM_br_up'/1000, uM_st'/1000];
+if side == "Left" || side == "Right"
+    copyForceTableForGoogleDocs(forceNames, forces);
+end
 
-b = [-f_FL_TP';
-    -M_TP'];
+hold off;
 
-format short
-F_mag = A\b;
-
-disp('Forces displyed in Newtons [x y z]')
-
-%% Scale Unit Vectors by force magnitude to obtain force vectors
-F_tieRod = F_mag(1) * u_tieRod
-F_LCA_in = F_mag(2) * u_LCA_in
-F_LCA_out = F_mag(3) * u_LCA_out
-F_UCA_in = F_mag(4) * u_UCA_in
-F_UCA_out = F_mag(5) * u_UCA_out
-F_PR = F_mag(6) * u_PR
-
-%% Running Rocker Script
-run('rockerForcesV1.m')
-
-%% Put Forces in a table
-forces = [
-    F_tieRod;
-    F_LCA_in;
-    F_LCA_out;
-    F_UCA_in;
-    F_UCA_out;
-    F_PR;
-    F_RC;
-    F_S];
-
-forceNames = {
-    'F_tieRod';
-    'F_LCA_in';
-    'F_LCA_out';
-    'F_UCA_in';
-    'F_UCA_out';
-    'F_PR';
-    'F_RC';
-    'F_S'
-};
-
-copyForceTableForGoogleDocs(forceNames, forces);
+function displayVectorComponents(vectorNames)
+    n = numel(vectorNames);
+    components = zeros(n, 3);  % Preallocate matrix
+    
+    for i = 1:n
+        components(i, :) = evalin('base', vectorNames{i});
+    end
+    
+    % Create table
+    disp(array2table(components, 'VariableNames', {'X', 'Y', 'Z'}, 'RowNames', vectorNames));
+end
 
 %% Forces to table functions
 function copyForceTableForGoogleDocs(forceNames, forces)
@@ -180,81 +144,3 @@ function s = insertCommas(str)
         end
     end
 end
-
-
-function T = makeForceTable(forceNames, forces)
-% makeForceTable - Create a table with force names and 3D components
-%
-% Syntax:
-%   T = makeForceTable(forceNames, forces)
-%
-% Inputs:
-%   forceNames - Cell array of strings, e.g. {'F_tieRod', 'F_LCA_in'}
-%   forces     - Nx3 matrix of [X Y Z] force components
-%
-% Output:
-%   T - MATLAB table with columns: Force Name, X (N), Y (N), Z (N)
-
-    if length(forceNames) ~= size(forces, 1)
-        error('Number of names must match number of force vectors.');
-    end
-
-    % Create table
-    T = table(forceNames(:), forces(:,1), forces(:,2), forces(:,3), ...
-        'VariableNames', {'ForceName', 'X_N', 'Y_N', 'Z_N'});
-end
-
-%% Draw Link Function
-% Draws suspension link given base point and direction vector (including length). Also, input the plot display name
-% and color of member.
-function drawLink(basePoint, directionVector, name, color)
-    LINE_WIDTH = 2;
-    quiver3(basePoint(1), basePoint(2), basePoint(3), directionVector(1), directionVector(2), directionVector(3), 0, "DisplayName", name, "Color", color, "LineWidth", LINE_WIDTH)
-end
-
-%% Draw Circle Function
-function drawCircle(center, normal, radius, name, color)
-    % center: [x, y, z]
-    % normal: normal vector to the plane
-    % radius: circle radius
-    % N: number of points (e.g., 100)
-    % color: plot color (optional)
-
-    N = 100;
-
-    if nargin < 5
-        color = 'b';
-    end
-
-    % Normalize normal vector
-    n = normal / norm(normal);
-
-    % Find two orthonormal vectors perpendicular to the normal
-    if abs(n(3)) < 1
-        v = [0, 0, 1];
-    else
-        v = [1, 0, 0];
-    end
-    x = cross(n, v); x = x / norm(x);
-    y = cross(n, x); % already unit-length
-
-    % Parametrize circle in local basis
-    theta = linspace(0, 2*pi, N);
-    circle = radius * (cos(theta)' * x + sin(theta)' * y) + center;
-
-    % Plot
-    plot3(circle(:,1), circle(:,2), circle(:,3), color, 'LineWidth', 2, "DisplayName", name);
-    axis equal
-    grid on
-end
-
-
-
-
-
-
-
-
-
-
-

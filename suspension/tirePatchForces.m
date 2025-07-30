@@ -1,14 +1,4 @@
-%% Setup
-
-% For clarity
-x = 1; y = 2; z = 3;
-
-% Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
-COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
-totalMass = 354.37; %kg
-trackWidth = 1270; %mm
-wheelBase = 2750; %mm
-g = 9.81; % gravatiational acceleration
+%% Computes forces at all four tire patches
 
 %% Loading Condition
 % %regs: 1g turn, 2g bump. 1g braking
