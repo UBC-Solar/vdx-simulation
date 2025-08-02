@@ -20,7 +20,7 @@ fprintf('Welcome to the VDX workspace!\n');
 % fetch latest info from remote
 [fetchStatus, fetchMsg] = system('git fetch');
 if fetchStatus ~= 0
-    fprintf('Git fetch failed:\n%s\n\t', fetchMsg);
+    fprintf('Git fetch failed:\n\t%s\n', fetchMsg);
     return
 end
 
