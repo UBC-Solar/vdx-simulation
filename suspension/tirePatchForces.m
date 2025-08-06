@@ -1,5 +1,5 @@
 %% Computes forces at all four tire patches
-
+x = 1; y = 2; z = 3;
 %% Loading Condition
 % %regs: 1g turn, 2g bump. 1g braking
 % bumpG = 2 %bump should >= 1 (no bump would be bumpG = 1 for static weight)
