@@ -1,48 +1,47 @@
-classdef carV3
-    properties (Constant)
-        % see ISO 8855 for coordinate systems etc.
+classdef (Abstract) SolarCar
+    % SolarCar Abstract base class for all solar vehicle generations.
+    %   Defines shared properties and methods useful in modelling core vehicle dynamics.
+    %
+    %   Where possible, this class follows coordinate systems and naming conventions prescribed in ISO 8855.
 
-        % Constants
-        g = 9.80665                     % m/s²
-
+    properties (Abstract)
         % Car
-        Wheelbase = 1820                % mm
-        Trackwidth = 900                % mm
-        RawMass = 270                   % kg
-        MinDriverMass = 80              % kg
-        CoGx = 0.53                     % along wheelbase
-        CoGy = 0.5                      % along trackwidth
-        CoGh = 450                      % mm
+        Name
+        Wheelbase           % mm
+        Trackwidth          % mm
+        RawMass             % kg
+        MinDriverMass       % kg
+        CoGx                % along wheelbase
+        CoGy                % along trackwidth
+        CoGh                % mm
 
         % Motor
-        NominalMotorPower = 1470        % W
-        PeakMotorPower = 5000           % W
-        NominalSpeed = 40/3.6           % kph → m/s
+        NominalMotorPower   % W
+        PeakMotorPower      % W
+        NominalSpeed        % m/s
 
-        % Rack & Pinion (Stiletto C42-340 12:1)
-        RPwidth = (11.25) * 25.4        % inch → mm
-        RPratio = (2.618) * 25.4        % inch/rev → mm/rev
-        RPmaxTravel = (4+5/8) * 25.4    % inch → mm
+        % Rack & Pinion
+        RPwidth             % mm
+        RPratio             % mm/rev
+        RPmaxTravel         % mm
 
-        % Wheel (Battlax SC 100/80-16 M/C 50P TL)
-        WheelRadius = 566/2             % mm
-        WheelCurvature = 54             % mm (radius)
-        TirePressure = 65 / 145         % psi → N/mm²
-        WheelStiffness = 115            % N/mm (50?)
+        % Wheel
+        WheelRadius         % mm
+        WheelCurvature      % mm (radius)
+        TirePressure        % N/mm²
+        WheelStiffness      % N/mm
 
         % Driving Surface
-        RoadCrown = deg2rad(2)          % radians
+        % TODO: BECOME A NEW TRACK.M ABSTRACT CLASS
+        RoadCrown           % radians
     end
 
     properties (Dependent)
-        Mass                            % kg
-        Weight                          % N
-        MotorThrust                     % N
+        Mass                % kg
+        Weight              % N
+        MotorThrust         % N
 
-        StaticLoadPB                    % N
-        StaticLoadPQ                    % N
-        StaticLoadSQ                    % N
-        StaticLoadSB                    % N
+        StaticLoadPB; StaticLoadPQ; StaticLoadSQ; StaticLoadSB % N
     end
 
     methods % for dependent properties
@@ -57,6 +56,7 @@ classdef carV3
     end
 
     methods (Access = private)
+        % TODO: MOVE TO AN ACCURATE DEFLECTION MODEL
         function load = solveLoad(obj, whlStr)                          % system of equations for static load distribution
             quadrantMap = struct('PB', 1, 'PQ', 2, 'SQ', 3, 'SB', 4);   % tire in quadrant n, following ISO 8855
 
@@ -70,7 +70,7 @@ classdef carV3
                 V(1) + V(2) - obj.CoGy*obj.Weight;              % roll moment balance
                 V(1) + V(3) - V(2) - V(4)                       % assume diagonals are equal
                 ];  % the fourth equation solves the indeterminancy problem
-                    % only valid if Gx == 0.5 *or* Gy == 0.5 (otherwise function output is approximate)
+            % only valid if Gx == 0.5 *or* Gy == 0.5 (otherwise function output is approximate)
 
             guessVec = 0.25*obj.Weight * ones(1, 4);
             solutionVec = fsolve(SYSTEM, guessVec, optimoptions('fsolve', 'Display', 'none'));
