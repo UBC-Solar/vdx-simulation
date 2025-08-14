@@ -13,7 +13,7 @@ turnDirection = 1; %right
 %%%%%% Set side to compute and plot %%%%%
 side = "Right"; % (coordiante driving primary side)
 %side = "Left";
-side = "Both";
+%side = "Both";
 
 % (choose only Right or Left side to have forces table copied to clipboard to paste
 % to google docs)
