@@ -13,7 +13,7 @@ turnDirection = 1; %right
 %%%%%% Set side to compute and plot %%%%%
 side = "Right"; % (coordiante driving primary side)
 %side = "Left";
-%side = "Both";
+side = "Both";
 
 % (choose only Right or Left side to have forces table copied to clipboard to paste
 % to google docs)
@@ -22,11 +22,18 @@ side = "Right"; % (coordiante driving primary side)
 %%%%%% Vehicle Paramters %%%%%%
 
 % Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
-COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
+%COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
 totalMass = 354.37; %kg
 trackWidth = 1270; %mm
 wheelBase = 2750; %mm
 g = 9.81; % gravatiational acceleration
+
+
+%%%%%% Set Plot View %%%%%%
+sw_view('iso_flip');
+% type "help sw_view" in the command window for more information
+% (or look at the sw_view.m file in suspension) 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -42,13 +49,20 @@ figure(1)
 xlabel('X'); ylabel('Y'); zlabel('Z');
 title('Solar VDX Suspension');
 subtitle(sprintf('Front %s Side(s)', side))
-grid on; axis equal
+axis equal
 hold on;
 legend show;
-view(3); % Set 3D view
+grid on;
+
+scatter3(COM(1), COM(2), COM(3), 'rx', 'DisplayName', 'COM')
 
 % Calculate Forces at Tire Patch
 run("tirePatchForces.m");
+disp("------Tire Patch Forces------")
+forcesTP = {'f_FL_TP', 'f_FR_TP', 'f_RL_TP', 'f_RR_TP'};
+displayVectorComponents(forcesTP)
+
+disp("------Hardpoint Forces------")
 
 if side == "Right" || side == "Both"
 
@@ -68,7 +82,7 @@ if side == "Left" || side == "Both"
     % negating the Y component
     for i = 1:numel(symbols)
         var = evalin('base', symbols(i));
-        assignin('base',symbols(i),[var(1), -var(2), var(3)])
+        assignin('base',symbols(i),[-var(1), var(2), var(3)])
     end
     clear var;
     % Solve static forces system and plot suspension
@@ -144,3 +158,6 @@ function s = insertCommas(str)
         end
     end
 end
+
+
+

@@ -16,6 +16,7 @@ u_UCA_out = pC_UCA_out - pU_UCA;
 u_PR = pR_PR - pUCA_PR;
 
 %% Plotting
+
 drawLink(pTR_out, u_tieRod, "TR", "r")
 drawLink(pU_LCA, u_LCA_in, "LCA_{in}", 'b')
 drawLink(pU_LCA, u_LCA_out, "LCA_{out}", 'g')
@@ -27,7 +28,7 @@ drawLink(pUCA_PR, u_PR, "PR", 'cyan')
 tireRadius = norm(p_WC-p_TP);
 scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
 scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
-drawCircle(p_WC, [0,1,0], tireRadius, "Tire", "k")
+drawCircle(p_WC, [1,0,0], tireRadius, "Tire", "k")
 
 
 % Normalizing;

@@ -1,4 +1,5 @@
 %% Computes forces at all four tire patches
+% Run mainHardpointForces.m! this script should not be run on own
 x = 1; y = 2; z = 3;
 %% Loading Condition
 % %regs: 1g turn, 2g bump. 1g braking

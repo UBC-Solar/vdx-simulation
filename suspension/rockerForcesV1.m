@@ -1,5 +1,5 @@
 %% Rocker Force Analysis
-
+% Run mainHardpointForces.m! this script should not be run on own
 % Assumming rocker plane is parallel to the YZ plane (x constant)
 
 % Pull Rod unit vector
