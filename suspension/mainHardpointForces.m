@@ -7,7 +7,7 @@ x = 1; y = 2; z = 3; % for clarity
 bumpG = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
 brakeG = 1;
 cornerG = 1;
-turnDirection = 1; %right
+turnDirection = -1; %right
 %turnDirection = -1 %left
 
 %%%%%% Set side to compute and plot %%%%%
@@ -30,7 +30,7 @@ g = 9.81; % gravatiational acceleration
 
 
 %%%%%% Set Plot View %%%%%%
-sw_view('iso_flip');
+sw_view('iso');
 % type "help sw_view" in the command window for more information
 % (or look at the sw_view.m file in suspension) 
 

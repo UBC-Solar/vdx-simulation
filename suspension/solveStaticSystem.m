@@ -60,13 +60,13 @@ uM_UCA_out = cross(d_UCA_out, u_UCA_out);
 uM_PR = cross(d_PR, u_PR);
 
 %% Calcualte moment due to input force at tire contact patch
-d_TP = (p_TP - MC)/1000;
+d_TP = (p_TP - MC);
 M_TP = cross(d_TP, f_TP);
 
 %% Solve the system (Ax = b)
 
 A = [u_tieRod', u_LCA_in', u_LCA_out', u_UCA_in', u_UCA_out', u_PR';
-    uM_tieRod'/1000, uM_LCA_in'/1000, uM_LCA_in'/1000, uM_LCA_out'/1000, uM_UCA_out'/1000, uM_PR'/1000];
+    uM_tieRod', uM_LCA_in', uM_LCA_in', uM_UCA_in', uM_UCA_out', uM_PR'];
 
 b = [-f_TP';
     -M_TP'];
