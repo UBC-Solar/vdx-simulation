@@ -46,7 +46,7 @@ classdef (Abstract) SolarCar
 
     methods % for dependent properties
         function x = get.Mass(obj);         x = obj.RawMass + obj.MinDriverMass; end
-        function x = get.Weight(obj);       x = obj.Mass * obj.g; end
+        function x = get.Weight(obj);       x = obj.Mass * Phys.g; end
         function x = get.MotorThrust(obj);  x = obj.NominalMotorPower / obj.NominalSpeed; end
 
         function x = get.StaticLoadPB(obj); x = obj.solveLoad('PB'); end
