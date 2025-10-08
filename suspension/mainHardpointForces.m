@@ -7,12 +7,18 @@ x = 1; y = 2; z = 3; % for clarity
 bumpG = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
 brakeG = 1;
 cornerG = 1;
-turnDirection = -1; %right
-%turnDirection = -1 %left
+turnDirection = 1; %right
+%turnDirection = -1; %left
+
+if turnDirection == 1
+    disp("***Turning Right***")
+else
+    disp("***Turning Left***")
+end
 
 %%%%%% Set side to compute and plot %%%%%
-side = "Right"; % (coordiante driving primary side)
-%side = "Left";
+%side = "Right"; % (coordiante driving primary side)
+side = "Left";
 %side = "Both";
 
 % (choose only Right or Left side to have forces table copied to clipboard to paste
