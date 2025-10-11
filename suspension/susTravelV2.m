@@ -21,31 +21,16 @@ end
 side = "Left";
 %side = "Both";
 
-% (choose only Right or Left side to have forces table copied to clipboard to paste
-% to google docs)
-
-
 %%%%%% Vehicle Paramters %%%%%%
-
-% Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
-%COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
 totalMass = 354.37; %kg
 trackWidth = 1270; %mm
 wheelBase = 2750; %mm
 g = 9.81; % gravatiational acceleration
 
-
 %%%%%% Set Plot View %%%%%%
-sw_view('iso');
-% type "help sw_view" in the command window for more information
-% (or look at the sw_view.m file in suspension) 
+%sw_view('right');
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% DO NOT EDIT BELOW:
 % Running Routines to Obtain Hardpoint Forces %
-
 % Getting coordinates from google sheet SW Hardpoints tab of V4 Vehicle
 % Dynamics sheet
 run("getCoordinatesV3.m")
@@ -56,76 +41,116 @@ disp("------Tire Patch Forces------")
 forcesTP = {'f_FL_TP', 'f_FR_TP', 'f_RL_TP', 'f_RR_TP'};
 displayVectorComponents(forcesTP)
 
-disp("------Hardpoint Forces------")
-
-if side == "Right" || side == "Both"
-
-    disp("Right side Forces displyed in Newtons")
-
-    % Primary Coordiante Side
-
-    % Solve static forces system and plot suspension
-    run("solveStaticSystem.m")
+% BUMPING %%%%%%%%%%%%%%%%%%%%
+% 2 inch (50.8mm) bump case
+resolution = 25;%%
+numOfOutputs = 6;
+MAX_BUMP_DISPLACMENT = 2; %[in]
+wheelDisplacement =  MAX_BUMP_DISPLACMENT*25.4; %[mm]
+wheelDisps = linspace(0,wheelDisplacement, resolution);
+F_mags = zeros(numOfOutputs,resolution);
+for idx = 1:resolution
+    pause(1)
+   
+    p_TP = p_TP + [0,wheelDisps(idx),0];
+    p_WC = p_WC + [0,wheelDisps(idx),0];
     
-    displayVectorComponents(forceNames)
-end
-
-if side == "Left" || side == "Both"
-    disp("Left side Forces displyed in Newtons")
-    % Secondary Coordiante Side
-    % negating the Y component
-    for i = 1:numel(symbols)
-        var = evalin('base', symbols(i));
-        assignin('base',symbols(i),[-var(1), var(2), var(3)])
+    pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, wheelDisps(idx));
+    pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, wheelDisps(idx));
+    pUCA_PR = rotatePoint(pUCA_PR, pR_C, wheelDisps(idx));
+    pR_PR = rotatePoint(pR_PR, pR_C, wheelDisps(idx));
+    pR_S = rotatePoint(pR_S, pR_C, wheelDisps(idx));
+    pTR_out = rotatePoint(pTR_out, pTR_in, wheelDisps(idx));
+    %implement projection to find piot point of other points
+    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    disp("------Hardpoint Forces------")
+    
+    if side == "Right" || side == "Both"
+    
+        disp("Right side Forces displyed in Newtons")
+    
+        % Primary Coordiante Side
+    
+        % Solve static forces system and plot suspension
+        run("solveStaticSystem.m")
+        
+        %displayVectorComponents(forceNames)
     end
-    clear var;
-    % Solve static forces system and plot suspension
-    run("solveStaticSystem.m")
-    displayVectorComponents(forceNames)
     
+    if side == "Left" || side == "Both"
+        disp("Left side Forces displyed in Newtons")
+        % Secondary Coordiante Side
+        % negating the Y component
+        for i = 1:numel(symbols)
+            var = evalin('base', symbols(i));
+            assignin('base',symbols(i),[-var(1), var(2), var(3)])
+        end
+        clear var;
+        % Solve static forces system and plot suspension
+        run("solveStaticSystem.m")
+        %displayVectorComponents(forceNames)
+        
+    end
+    
+    % Recording Forces
+    F_mags(:,idx) = F_mag;
+
+    % Setting up figure
+    % figure(1)
+    % xlabel('X'); ylabel('Y'); zlabel('Z');
+    % title('Solar VDX Suspension');
+    % subtitle(sprintf('Front %s Side(s)', side))
+    % axis equal
+    % hold on;
+    % %legend show;
+    % grid on;
+    
+    % %% Plotting
+    % % Drawing
+    % scatter3(COM(1), COM(2), COM(3), 'rx', 'DisplayName', 'COM')
+    % 
+    % drawLink(pTR_out, pTR_in - pTR_out, "TR", "r")
+    % drawLink(pU_LCA, pC_LCA_in - pU_LCA, "LCA_{in}", 'b')
+    % drawLink(pU_LCA, pC_LCA_out - pU_LCA, "LCA_{out}", 'g')
+    % drawLink(pU_UCA, pC_UCA_in - pU_UCA, "UCA_{in}", 'm')
+    % drawLink(pU_UCA, pC_UCA_out - pU_UCA, "UCA_{out}", 'k')
+    % drawLink(pUCA_PR, pR_PR - pUCA_PR, "PR", 'cyan')
+    % 
+    % % Plot wheel center and tire patch
+    % tireRadius = norm(p_WC-p_TP);
+    % scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
+    % scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
+    % drawCircle(p_WC, [1,0,0], tireRadius, "Tire", "k")
+    % 
+    % % Rocker Plotting
+    % drawPoint(pR_C, 'pR_C', 'k')
+    % drawPoint(pR_PR, 'pR_{PR}', 'o')
+    % drawPoint(pR_S, 'pR_S', 'g')
+    % rockerPoints = [pR_C; pR_PR; pR_S; pR_C];
+    % 
+    % % Connect rocker points with line
+    % plot3(rockerPoints(:,x), rockerPoints(:,y), rockerPoints(:,z), 'DisplayName', 'Rocker')
+    % 
+    % hold off;
 end
 
-if side == "Left" || side == "Right"
-    copyForceTableForGoogleDocs(forceNames, forces);
+
+
+for j = 1:numOfOutputs
+    plot(wheelDisps/25.4,F_mags(j,:)/1000, 'DisplayName', forceNames{j})
+    if j == 1
+        hold on
+        legend show;
+        xlabel("Wheel Displacement [in]")
+        ylabel("Force Magnitude [kN]")
+    end
 end
 
-% Setting up figure
-figure(1)
-xlabel('X'); ylabel('Y'); zlabel('Z');
-title('Solar VDX Suspension');
-subtitle(sprintf('Front %s Side(s)', side))
-axis equal
-hold on;
-legend show;
-grid on;
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Plotting
-% Drawing
-scatter3(COM(1), COM(2), COM(3), 'rx', 'DisplayName', 'COM')
-
-drawLink(pTR_out, pTR_in - pTR_out, "TR", "r")
-drawLink(pU_LCA, pC_LCA_in - pU_LCA, "LCA_{in}", 'b')
-drawLink(pU_LCA, pC_LCA_out - pU_LCA, "LCA_{out}", 'g')
-drawLink(pU_UCA, pC_UCA_in - pU_UCA, "UCA_{in}", 'm')
-drawLink(pU_UCA, pC_UCA_out - pU_UCA, "UCA_{out}", 'k')
-drawLink(pUCA_PR, pR_PR - pUCA_PR, "PR", 'cyan')
-
-% Plot wheel center and tire patch
-tireRadius = norm(p_WC-p_TP);
-scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
-scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
-drawCircle(p_WC, [1,0,0], tireRadius, "Tire", "k")
-
-% Rocker Plotting
-drawPoint(pR_C, 'pR_C', 'k')
-drawPoint(pR_PR, 'pR_{PR}', 'o')
-drawPoint(pR_S, 'pR_S', 'g')
-rockerPoints = [pR_C; pR_PR; pR_S; pR_C];
-
-% Connect rocker points with line
-plot3(rockerPoints(:,x), rockerPoints(:,y), rockerPoints(:,z), 'DisplayName', 'Rocker')
-
-hold off;
+%% FUNCTIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function displayVectorComponents(vectorNames)
     n = numel(vectorNames);
@@ -235,6 +260,26 @@ end
 function drawPoint(coordinateVector, name, color)
     scatter3(coordinateVector(1), coordinateVector(2), coordinateVector(3), color, 'filled', 'DisplayName', name)
 end
+
+%% Rotate a point about a an axis parallel to X axis
+function P_rotated = rotatePoint(point, axisPoint, displacement)
+
+    % Shift Point to Origin
+    P_shifted = point - axisPoint;
+
+    % Rotation matrix about X axis --FIX! cooked cooked 
+    t = asin(displacement/norm(point-axisPoint));
+    Rx = [ 1,       0,        0;
+           0,     cos(t)   sin(t);
+           0,      -sin(t)   cos(t)];
+
+    % Rotate shifted point about origin
+    P_rotated_shifted = Rx * P_shifted';
+
+    P_rotated = P_rotated_shifted' + axisPoint; 
+end
+
+
 
 
 
