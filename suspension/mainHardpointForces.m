@@ -50,18 +50,6 @@ sw_view('iso');
 % Dynamics sheet
 run("getCoordinatesV3.m")
 
-% Setting up figure
-figure(1)
-xlabel('X'); ylabel('Y'); zlabel('Z');
-title('Solar VDX Suspension');
-subtitle(sprintf('Front %s Side(s)', side))
-axis equal
-hold on;
-legend show;
-grid on;
-
-scatter3(COM(1), COM(2), COM(3), 'rx', 'DisplayName', 'COM')
-
 % Calculate Forces at Tire Patch
 run("tirePatchForces.m");
 disp("------Tire Patch Forces------")
@@ -100,6 +88,42 @@ end
 if side == "Left" || side == "Right"
     copyForceTableForGoogleDocs(forceNames, forces);
 end
+
+% Setting up figure
+figure(1)
+xlabel('X'); ylabel('Y'); zlabel('Z');
+title('Solar VDX Suspension');
+subtitle(sprintf('Front %s Side(s)', side))
+axis equal
+hold on;
+legend show;
+grid on;
+
+%% Plotting
+% Drawing
+scatter3(COM(1), COM(2), COM(3), 'rx', 'DisplayName', 'COM')
+
+drawLink(pTR_out, pTR_in - pTR_out, "TR", "r")
+drawLink(pU_LCA, pC_LCA_in - pU_LCA, "LCA_{in}", 'b')
+drawLink(pU_LCA, pC_LCA_out - pU_LCA, "LCA_{out}", 'g')
+drawLink(pU_UCA, pC_UCA_in - pU_UCA, "UCA_{in}", 'm')
+drawLink(pU_UCA, pC_UCA_out - pU_UCA, "UCA_{out}", 'k')
+drawLink(pUCA_PR, pR_PR - pUCA_PR, "PR", 'cyan')
+
+% Plot wheel center and tire patch
+tireRadius = norm(p_WC-p_TP);
+scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
+scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
+drawCircle(p_WC, [1,0,0], tireRadius, "Tire", "k")
+
+% Rocker Plotting
+drawPoint(pR_C, 'pR_C', 'k')
+drawPoint(pR_PR, 'pR_{PR}', 'o')
+drawPoint(pR_S, 'pR_S', 'g')
+rockerPoints = [pR_C; pR_PR; pR_S; pR_C];
+
+% Connect rocker points with line
+plot3(rockerPoints(:,x), rockerPoints(:,y), rockerPoints(:,z), 'DisplayName', 'Rocker')
 
 hold off;
 
@@ -164,6 +188,54 @@ function s = insertCommas(str)
         end
     end
 end
+
+%% Draw Link Function
+% Draws suspension link given base point and direction vector (including length). Also, input the plot display name
+% and color of member.
+function drawLink(basePoint, directionVector, name, color)
+    LINE_WIDTH = 2;
+    quiver3(basePoint(1), basePoint(2), basePoint(3), directionVector(1), directionVector(2), directionVector(3), 0, "DisplayName", name, "Color", color, "LineWidth", LINE_WIDTH)
+end
+
+%% Draw Circle Function
+function drawCircle(center, normal, radius, name, color)
+    % center: [x, y, z]
+    % normal: normal vector to the plane
+    % radius: circle radius
+    % N: number of points (e.g., 100)
+    % color: plot color (optional)
+
+    N = 100;
+
+    if nargin < 5
+        color = 'b';
+    end
+
+    % Normalize normal vector
+    n = normal / norm(normal);
+
+    % Find two orthonormal vectors perpendicular to the normal
+    if abs(n(3)) < 1
+        v = [0, 0, 1];
+    else
+        v = [1, 0, 0];
+    end
+    x = cross(n, v); x = x / norm(x);
+    y = cross(n, x); % already unit-length
+
+    % Parametrize circle in local basis
+    theta = linspace(0, 2*pi, N);
+    circle = radius * (cos(theta)' * x + sin(theta)' * y) + center;
+
+    % Plot
+    plot3(circle(:,1), circle(:,2), circle(:,3), color, 'LineWidth', 2, "DisplayName", name);
+end
+
+%% Draw point function
+function drawPoint(coordinateVector, name, color)
+    scatter3(coordinateVector(1), coordinateVector(2), coordinateVector(3), color, 'filled', 'DisplayName', name)
+end
+
 
 
 

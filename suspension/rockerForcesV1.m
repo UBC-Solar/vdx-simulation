@@ -31,17 +31,3 @@ FR = AR\bR;
 F_RC = [0, FR(1), FR(2)];
 F_S = FR(3)*u_S; 
 
-
-%% Plotting
-drawPoint(pR_C, 'pR_C', 'k')
-drawPoint(pR_PR, 'pR_{PR}', 'o')
-drawPoint(pR_S, 'pR_S', 'g')
-rockerPoints = [pR_C; pR_PR; pR_S; pR_C];
-
-% Connect points with line
-plot3(rockerPoints(:,x), rockerPoints(:,y), rockerPoints(:,z), 'DisplayName', 'Rocker')
-
-%% Draw point function
-function drawPoint(coordinateVector, name, color)
-    scatter3(coordinateVector(1), coordinateVector(2), coordinateVector(3), color, 'filled', 'DisplayName', name)
-end

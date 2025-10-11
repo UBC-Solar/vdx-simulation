@@ -28,9 +28,6 @@ end
 % ANGLE = atand(YYY/XXX)
 % ANGLE2 = atand(3/XXX)
 
-
-
-
 %% Direction Vectors
 u_tieRod = pTR_in - pTR_out;
 u_LCA_in = pC_LCA_in - pU_LCA; %inboard was front and outboard was rear
@@ -38,22 +35,6 @@ u_LCA_out = pC_LCA_out - pU_LCA;
 u_UCA_in = pC_UCA_in - pU_UCA;
 u_UCA_out = pC_UCA_out - pU_UCA;
 u_PR = pR_PR - pUCA_PR;
-
-%% Plotting
-
-drawLink(pTR_out, u_tieRod, "TR", "r")
-drawLink(pU_LCA, u_LCA_in, "LCA_{in}", 'b')
-drawLink(pU_LCA, u_LCA_out, "LCA_{out}", 'g')
-drawLink(pU_UCA, u_UCA_in, "UCA_{in}", 'm')
-drawLink(pU_UCA, u_UCA_out, "UCA_{out}", 'k')
-drawLink(pUCA_PR, u_PR, "PR", 'cyan')
-
-% Plot wheel center and tire patch
-tireRadius = norm(p_WC-p_TP);
-scatter3(p_WC(1), p_WC(2), p_WC(3), 50, 'b', 'filled', 'DisplayName','WC')
-scatter3(p_TP(1), p_TP(2), p_TP(3), 50, 'r', 'filled', 'DisplayName','TP')
-drawCircle(p_WC, [1,0,0], tireRadius, "Tire", "k")
-
 
 % Normalizing;
 u_tieRod = u_tieRod/norm(u_tieRod);
@@ -132,49 +113,6 @@ forceNames = {
     'F_S'
 };
 
-
-
-%% Draw Link Function
-% Draws suspension link given base point and direction vector (including length). Also, input the plot display name
-% and color of member.
-function drawLink(basePoint, directionVector, name, color)
-    LINE_WIDTH = 2;
-    quiver3(basePoint(1), basePoint(2), basePoint(3), directionVector(1), directionVector(2), directionVector(3), 0, "DisplayName", name, "Color", color, "LineWidth", LINE_WIDTH)
-end
-
-%% Draw Circle Function
-function drawCircle(center, normal, radius, name, color)
-    % center: [x, y, z]
-    % normal: normal vector to the plane
-    % radius: circle radius
-    % N: number of points (e.g., 100)
-    % color: plot color (optional)
-
-    N = 100;
-
-    if nargin < 5
-        color = 'b';
-    end
-
-    % Normalize normal vector
-    n = normal / norm(normal);
-
-    % Find two orthonormal vectors perpendicular to the normal
-    if abs(n(3)) < 1
-        v = [0, 0, 1];
-    else
-        v = [1, 0, 0];
-    end
-    x = cross(n, v); x = x / norm(x);
-    y = cross(n, x); % already unit-length
-
-    % Parametrize circle in local basis
-    theta = linspace(0, 2*pi, N);
-    circle = radius * (cos(theta)' * x + sin(theta)' * y) + center;
-
-    % Plot
-    plot3(circle(:,1), circle(:,2), circle(:,3), color, 'LineWidth', 2, "DisplayName", name);
-end
 
 %% Rotate a point about a an axis parallel to X axis
 function P_rotated = rotatePoint(point, axisPoint, displacement)
