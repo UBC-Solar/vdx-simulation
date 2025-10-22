@@ -7,6 +7,8 @@ else
     f_TP = f_FL_TP;
 end
 
+% f_TP = f_RL_TP
+
 
 % 2 inch (50.8mm) bump case
 % MAX_BUMP_DISPLACMENT = 2; %[in]
@@ -88,8 +90,41 @@ F_PR = F_mag(6) * u_PR;
 
 %zzz_F_sum = F_tieRod+F_LCA_in+F_LCA_out+F_UCA_in+F_UCA_out+F_PR
 
-%% Running Rocker Script
-run('rockerForcesV1.m')
+%% Running Rocker Routine
+% Rocker Force Analysis
+% Run mainHardpointForces.m! this script should not be run on own
+% Assumming rocker plane is parallel to the YZ plane (x constant)
+
+% Pull Rod unit vector
+u_PR = F_PR/norm(F_PR);
+
+% Shock unit direction vector
+u_S = (pC_S - pR_C)/norm(pC_S - pR_C);
+
+ % Moment about rocker chassis point
+ dR_PR = pR_PR - pR_C;
+ dR_S = pR_S - pR_C;
+
+ % Unit moment vectors
+ uMR_PR = cross(dR_PR, u_PR);
+ uMR_S = cross(dR_S, u_S);
+
+ % Linear System
+ AR = [1, 0, u_S(y);
+      0, 1, u_S(z);
+      zeros(3,1), zeros(3,1), uMR_S'];
+
+ bR = [-F_PR(y);
+     -F_PR(z);
+     -(norm(F_PR)*uMR_PR)'];
+
+FR = AR\bR;
+
+% Rocker-Chassis Force, Rocker Shock Force
+F_RC = [0, FR(1), FR(2)];
+F_S = FR(3)*u_S; 
+
+
 
 %% Put Forces in a table
 forces = [
@@ -112,6 +147,10 @@ forceNames = {
     'F_RC';
     'F_S'
 };
+
+% tieRodBJ = F_tieRod
+% LBJ = F_LCA_in + F_LCA_out;
+% UBJ = F_UCA_in + F_LCA_out;
 
 
 %% Rotate a point about a an axis parallel to X axis

@@ -1,44 +1,46 @@
 %% MAIN SCRIPT TO CALULATE HARDPOINT FORCES %%
-clear, close, clc, clf % clears workspace, closes figures, clears terminal, clear figure
-x = 1; y = 2; z = 3; % for clarity
+clear, close, clc, % clears workspace, closes figures, clears terminal,
+
+% Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
+totalMass = 354.37; %kg
+wheelBase = 2750; %mm
 
 %%%%%% Set Loading Condition here! %%%%%%
 %regs: 1g turn, 2g bump, 1g braking
-bumpG = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
-brakeG = 1;
-cornerG = 1;
-turnDirection = 1; %right
-%turnDirection = -1; %left
+loading.bump = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+loading.brake = 1;
+loading.corner = 1;
+loading.turnDirection = 1; %1:right, -1:left
 
-if turnDirection == 1
+%%%%%% Set side to compute and plot %%%%%
+side = "Right"; % (coordiante driving primary side)
+%side = "Left";
+%side = "Both";
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Read coordinates from VDX Hardpoints spreadsheet and store in a struct, p
+p = getCoordinates();
+
+% Compute forces at tire patch and store in a struct, f_tp
+f_tp = computeTirePatchForces(p.COM, totalMass, wheelBase, 2*abs(p.TP(1)), loading);
+disp("Tire Patch Forces [N]:")
+disp(f_tp)
+
+% Display Turn Direction
+if loading.turnDirection == 1
     disp("***Turning Right***")
 else
     disp("***Turning Left***")
 end
 
-%%%%%% Set side to compute and plot %%%%%
-%side = "Right"; % (coordiante driving primary side)
-side = "Left";
-%side = "Both";
 
-%%%%%% Vehicle Paramters %%%%%%
-totalMass = 354.37; %kg
-trackWidth = 1270; %mm
-wheelBase = 2750; %mm
-g = 9.81; % gravatiational acceleration
+
 
 %%%%%% Set Plot View %%%%%%
-sw_view('right');
+%sw_view('right');
 
-% Running Routines to Obtain Hardpoint Forces %
-% Getting coordinates from google sheet SW Hardpoints tab of V4 Vehicle
-% Dynamics sheet
-run("getCoordinatesV3.m")
 
-% Calculate Forces at Tire Patch
-run("tirePatchForces.m");
-disp("------Tire Patch Forces------")
-forcesTP = {'f_FL_TP', 'f_FR_TP', 'f_RL_TP', 'f_RR_TP'};
 displayVectorComponents(forcesTP)
 
 disp("------Hardpoint Forces------")
@@ -280,7 +282,7 @@ forceNames = {
     rockerPoints = [pR_C; pR_PR; pR_S; pR_C];
 
     % Connect rocker points with line
-    plot3(rockerPoints(:,x), rockerPoints(:,y), rockerPoints(:,z), 'DisplayName', 'Rocker')
+    plot3(rockerPoints(:,1), rockerPoints(:,2), rockerPoints(:,3), 'DisplayName', 'Rocker')
 
     hold off;
 end
