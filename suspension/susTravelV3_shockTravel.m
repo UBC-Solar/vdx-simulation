@@ -1,4 +1,4 @@
-%% MAIN SCRIPT TO CALULATE HARDPOINT FORCES %%
+%% MAIN SCRIPT TO CALCULATE HARDPOINT FORCES %%
 clear, close, clc, % clears workspace, closes figures, clears terminal,
 
 % Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
@@ -6,70 +6,54 @@ totalMass = 354.37; %kg
 wheelBase = 2750; %mm
 
 %%%%%% Set Loading Condition here! %%%%%%
-%regs: 1g turn, 2g bump, 1g braking
-loading.bump = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
-loading.brake = 1;
-loading.corner = 1;
+% regs: 2g bump, 1g brake, 1g corner
+% Our new standard: 4g bump, 2g brake, 1g corner
+loading.bump = 4; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+loading.brake = 2;
+loading.corner = 2;
 loading.turnDirection = 1; %1:right, -1:left
 
 %%%%%% Set side to compute and plot %%%%%
-side = "Right"; % (coordiante driving primary side)
-%side = "Left";
+%side = "Right"; % (coordiante driving primary side)
+side = "Left";
 %side = "Both";
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% Read coordinates from VDX Hardpoints spreadsheet and store in a struct, p
-p = getCoordinates();
-
-% Compute forces at tire patch and store in a struct, f_tp
-f_tp = computeTirePatchForces(p.COM, totalMass, wheelBase, 2*abs(p.TP(1)), loading);
-disp("Tire Patch Forces [N]:")
-disp(f_tp)
-
-% Display Turn Direction
-if loading.turnDirection == 1
-    disp("***Turning Right***")
-else
-    disp("***Turning Left***")
-end
-
-
-
 
 %%%%%% Set Plot View %%%%%%
 %sw_view('right');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-displayVectorComponents(forcesTP)
-
-disp("------Hardpoint Forces------")
-
-if side == "Right" || side == "Both"
-
-    disp("Right side Forces displyed in Newtons")
-
-    % Primary Coordiante Side
-
-    % Solve static forces system and plot suspension
-    run("solveStaticSystem.m")
-    
-    displayVectorComponents(forceNames)
+% Display Turn Direction
+if loading.turnDirection == 1
+    disp("***Turning Right***")
+elseif loading.turnDirection == -1
+        disp("***Turning Left***")
+else
+    error("Invalid Turn Direction. Left: -1, Right: 1")
 end
 
-if side == "Left" || side == "Both"
-    disp("Left side Forces displyed in Newtons")
-    % Secondary Coordiante Side
-    % negating the Y component
-    for i = 1:numel(symbols)
-        var = evalin('base', symbols(i));
-        assignin('base',symbols(i),[-var(1), var(2), var(3)])
-    end
-    clear var;
-    % Solve static forces system and plot suspension
-    run("solveStaticSystem.m")
-    displayVectorComponents(forceNames)
-    
+% Read coordinates from VDX Hardpoints spreadsheet and store in a struct, p
+pFR = getCoordinates();
+
+% Negate x component to optain left side hardpoint coordinates
+pFL = structfun(@(p) [-p(1), p(2), p(3)], pFR, "UniformOutput", false);
+
+% Compute forces at tire patch and store in a struct, f
+f = computeTirePatchForces(pFR.COM, totalMass, wheelBase, 2*abs(pFR.TP(1)), loading);
+disp("------Tire Patch Forces [N]------")
+displayForceVectors(f)
+
+disp("------ Front Hardpoint Forces------")
+if side == "Right"
+disp("RIGHT SIDE:")
+F_FR = solveStaticSystemFUNC(pFR, f.FR);
+displayForceVectors(F_FR)
+
+elseif side == "Left"
+disp("LEFT SIDE:")
+F_FL = solveStaticSystemFUNC(pFL, f.FL);
+displayForceVectors(F_FL)
+
 end
 
 % BUMPING %%%%%%%%%%%%%%%%%%%%
@@ -98,151 +82,7 @@ for idx = 1:resolution
     
 %% Computes Front Suspension Forces and Plots
 
-% Determining if we are computing the front left or right 
-if p_WC(1) < 0
-    f_TP = f_FR_TP;
-else
-    f_TP = f_FL_TP;
-end
-
-
-% 2 inch (50.8mm) bump case
-% MAX_BUMP_DISPLACMENT = 2; %[in]
-% wheelDisplacement = MAX_BUMP_DISPLACMENT*25.4; %[mm]
-% 
-% pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, wheelDisplacement);
-% pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, wheelDisplacement);
-% pUCA_PR = rotatePoint(pUCA_PR, pR_C, wheelDisplacement);
-% pR_PR = rotatePoint(pR_PR, pR_C, wheelDisplacement);
-% pR_S = rotatePoint(pR_S, pR_C, wheelDisplacement);
-%pTR_out = rotatePoint
-
-
-%ZZZ TESTING
-% XXX = norm(pU_UCA - pC_UCA_in);
-% p_0 = pU_UCA;
-% pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, 3);
-% YYY = norm(p_0-pU_UCA);
-% ANGLE = atand(YYY/XXX)
-% ANGLE2 = atand(3/XXX)
-
-%% Direction Vectors
-u_tieRod = pTR_in - pTR_out;
-u_LCA_in = pC_LCA_in - pU_LCA; %inboard was front and outboard was rear
-u_LCA_out = pC_LCA_out - pU_LCA; 
-u_UCA_in = pC_UCA_in - pU_UCA;
-u_UCA_out = pC_UCA_out - pU_UCA;
-u_PR = pR_PR - pUCA_PR;
-
-% Normalizing;
-u_tieRod = u_tieRod/norm(u_tieRod);
-u_LCA_in = u_LCA_in/norm(u_LCA_in);
-u_LCA_out = u_LCA_out/norm(u_LCA_out);
-u_UCA_in = u_UCA_in/norm(u_UCA_in);
-u_UCA_out = u_UCA_out/norm(u_UCA_out);
-u_PR = u_PR/norm(u_PR);
-
-%% Calculate Moment Arms from each chassis point
-MC = p_O; % moment center setting as origin for now
-%WILL NEED TO BE A DATA FIELD LATER FOR CORNER (SINCE DIFFERNET FOR FRONT AND BACK)
-d_tieRod = (pTR_in - p_O);
-d_LCA_in = (pC_LCA_in - p_O);
-d_LCA_out = (pC_LCA_out - p_O);
-d_UCA_in = (pC_UCA_in - p_O);
-d_UCA_out = (pC_UCA_out - p_O);
-d_PR = (pR_PR - p_O);
-
-
-%% Calculate momemnt unit vectors for each chassis point 
-% using the moment arms and force unit vectors
-uM_tieRod = cross(d_tieRod, u_tieRod);
-uM_LCA_in = cross(d_LCA_in, u_LCA_in);
-uM_LCA_out = cross(d_LCA_out, u_LCA_out);
-uM_UCA_in = cross(d_UCA_out, u_UCA_in);
-uM_UCA_out = cross(d_UCA_out, u_UCA_out);
-uM_PR = cross(d_PR, u_PR);
-
-%% Calcualte moment due to input force at tire contact patch
-d_TP = (p_TP - MC);
-M_TP = cross(d_TP, f_TP);
-
-%% Solve the system (Ax = b)
-
-A = [u_tieRod', u_LCA_in', u_LCA_out', u_UCA_in', u_UCA_out', u_PR';
-    uM_tieRod', uM_LCA_in', uM_LCA_in', uM_UCA_in', uM_UCA_out', uM_PR'];
-
-b = [-f_TP';
-    -M_TP'];
-
-F_mag = A\b;
-
-%% Scale Unit Vectors by force magnitude to obtain force vectors
-F_tieRod = F_mag(1) * u_tieRod;
-F_LCA_in = F_mag(2) * u_LCA_in;
-F_LCA_out = F_mag(3) * u_LCA_out;
-F_UCA_in = F_mag(4) * u_UCA_in;
-F_UCA_out = F_mag(5) * u_UCA_out;
-F_PR = F_mag(6) * u_PR;
-
-%zzz_F_sum = F_tieRod+F_LCA_in+F_LCA_out+F_UCA_in+F_UCA_out+F_PR
-
-%% Running Rocker Routine
-% Rocker Force Analysis
-% Run mainHardpointForces.m! this script should not be run on own
-% Assumming rocker plane is parallel to the YZ plane (x constant)
-
-% Pull Rod unit vector
-u_PR = F_PR/norm(F_PR);
-
-% Shock unit direction vector
-u_S = (pC_S - pR_C)/norm(pC_S - pR_C);
-
- % Moment about rocker chassis point
- dR_PR = pR_PR - pR_C;
- dR_S = pR_S - pR_C;
-
- % Unit moment vectors
- uMR_PR = cross(dR_PR, u_PR);
- uMR_S = cross(dR_S, u_S);
-
- % Linear System
- AR = [1, 0, u_S(y);
-      0, 1, u_S(z);
-      zeros(3,1), zeros(3,1), uMR_S'];
-
- bR = [-F_PR(y);
-     -F_PR(z);
-     -(norm(F_PR)*uMR_PR)'];
-
-FR = AR\bR;
-
-% Rocker-Chassis Force, Rocker Shock Force
-F_RC = [0, FR(1), FR(2)];
-F_S = FR(3)*u_S; 
-
-
-
-%% Put Forces in a table
-forces = [
-    F_tieRod;
-    F_LCA_in;
-    F_LCA_out;
-    F_UCA_in;
-    F_UCA_out;
-    F_PR;
-    F_RC;
-    F_S];
-
-forceNames = {
-    'F_{tieRod}';
-    'F_{LCA_{in}}';
-    'F_{LCA_{out}}';
-    'F_{UCA_{in}}';
-    'F_{UCA_{out}}';
-    'F_{PR}';
-    'F_{RC}';
-    'F_{S}'
-};
+%%% COMPUTE FORCES HERE AND RECORD
 
     % Recording Forces
     F_mags(:,idx) = F_mag;
@@ -304,12 +144,25 @@ end
 %% FUNCTIONS
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+function displayForceVectors(struct)
+    fields = fieldnames(struct);
+    n = numel(fields);
+    forceVectors = zeros(n, 3);
+    for i = 1:n
+        field = fields{i};
+        value = struct.(field);
+        forceVectors(i, :) = value;
+    end
+    % Create table
+    disp(array2table(forceVectors, 'VariableNames', {'X', 'Y', 'Z'}, 'RowNames', fields));
+end
+
 function displayVectorComponents(vectorNames)
     n = numel(vectorNames);
     components = zeros(n, 3);  % Preallocate matrix
     
     for i = 1:n
-        components(i, :) = evalin('base', vectorNames{i});
+        forceVector(i, :) = evalin('base', vectorNames{i});
     end
     
     % Create table
