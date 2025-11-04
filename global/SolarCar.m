@@ -22,7 +22,7 @@ classdef (Abstract) SolarCar
 
         % Rack & Pinion
         RPwidth             % mm
-        RPratio             % mm/rev
+        Cfactor             % mm/rev
         RPmaxTravel         % mm
 
         % Wheel
