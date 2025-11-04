@@ -9,6 +9,11 @@ The repository for all things vehicle dynamics (VDX) at [UBC Solar](https://gith
 | sandbox/ | ✓       | ✗                    | one-off calculations, sharing rudimentary scripts             |
 | others   | ✓       | ✓                    | orderly, documented, reusable scripts (most things)           |
 
+## Live Scripts
+Moving forward, `vdx-simulation` has deprecated binary `.mlx` live scripts in favour of R2025a `.m` [plain text live scripts](https://www.mathworks.com/help/matlab/matlab_prog/plain-text-file-format-for-live-scripts.html). This will keep our codebase more maintainable and make editing, merges, and blame easier.
+
+All live scripts commited to the repository should first have **Clear All Output** ran in MATLAB to keep diff sizes small. In future, a pre-commit hook will be set up to lint for un-cleared output.
+
 ## vdx_launch.m
 `vdx_launch.m` is a startup utility to set up your [MATLAB session path](https://www.mathworks.com/help/matlab/matlab_env/files-and-folders-that-matlab-accesses.html) to include the full repository (while excluding `sandbox/` and `indev/`). Additionally, it prints Git status info to the terminal on startup.
 
