@@ -11,15 +11,15 @@ end
 
 
 % 2 inch (50.8mm) bump case
-% MAX_BUMP_DISPLACMENT = 2; %[in]
-% wheelDisplacement = MAX_BUMP_DISPLACMENT*25.4; %[mm]
-% 
-% pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, wheelDisplacement);
-% pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, wheelDisplacement);
-% pUCA_PR = rotatePoint(pUCA_PR, pR_C, wheelDisplacement);
-% pR_PR = rotatePoint(pR_PR, pR_C, wheelDisplacement);
-% pR_S = rotatePoint(pR_S, pR_C, wheelDisplacement);
-%pTR_out = rotatePoint
+MAX_BUMP_DISPLACMENT = 2; %[in]
+wheelDisplacement = MAX_BUMP_DISPLACMENT*25.4; %[mm]
+
+pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, wheelDisplacement);
+pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, wheelDisplacement);
+pUCA_PR = rotatePoint(pUCA_PR, pR_C, wheelDisplacement);
+pR_PR = rotatePoint(pR_PR, pR_C, wheelDisplacement);
+pR_S = rotatePoint(pR_S, pR_C, wheelDisplacement);
+pTR_out = rotatePoint(pTR_out, pTR_in, wheelDisplacement);
 
 
 %ZZZ TESTING
@@ -62,7 +62,7 @@ d_PR = (pR_PR - p_O);
 uM_tieRod = cross(d_tieRod, u_tieRod);
 uM_LCA_in = cross(d_LCA_in, u_LCA_in);
 uM_LCA_out = cross(d_LCA_out, u_LCA_out);
-uM_UCA_in = cross(d_UCA_out, u_UCA_in);
+uM_UCA_in = cross(d_UCA_in, u_UCA_in);
 uM_UCA_out = cross(d_UCA_out, u_UCA_out);
 uM_PR = cross(d_PR, u_PR);
 
@@ -73,7 +73,7 @@ M_TP = cross(d_TP, f_TP);
 %% Solve the system (Ax = b)
 
 A = [u_tieRod', u_LCA_in', u_LCA_out', u_UCA_in', u_UCA_out', u_PR';
-    uM_tieRod', uM_LCA_in', uM_LCA_in', uM_UCA_in', uM_UCA_out', uM_PR'];
+    uM_tieRod', uM_LCA_in', uM_LCA_out', uM_UCA_in', uM_UCA_out', uM_PR'];
 
 b = [-f_TP';
     -M_TP'];

@@ -9,7 +9,7 @@ wheelBase = 2750; %mm
 % regs: 2g bump, 1g brake, 1g corner
 % Our new standard: 4g bump, 2g brake, 1g corner
 loading.bump = 4; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
-loading.brake = 2;
+loading.brake = 1;
 loading.corner = 2;
 loading.turnDirection = 1; %1:right, -1:left
 
@@ -45,47 +45,47 @@ displayForceVectors(f)
 
 disp("------ Front Hardpoint Forces------")
 if side == "Right"
-disp("RIGHT SIDE:")
-F_FR = solveStaticSystemFUNC(pFR, f.FR);
-displayForceVectors(F_FR)
+    disp("RIGHT SIDE:")
+    F_FR = solveStaticSystemFUNC(pFR, f.FR);
+    displayForceVectors(F_FR)
 
 elseif side == "Left"
-disp("LEFT SIDE:")
-F_FL = solveStaticSystemFUNC(pFL, f.FL);
-displayForceVectors(F_FL)
+    disp("LEFT SIDE:")
+    F_FL = solveStaticSystemFUNC(pFL, f.FL);
+    displayForceVectors(F_FL)
 
 end
-
-% BUMPING %%%%%%%%%%%%%%%%%%%%
-% 2 inch (50.8mm) bump case
-resolution = 25;%%
-numOfOutputs = 6;
-MAX_BUMP_DISPLACMENT = 2; %[in]
-wheelDisplacement =  MAX_BUMP_DISPLACMENT*25.4; %[mm]
-wheelDisps = linspace(0,wheelDisplacement, resolution);
-dh = wheelDisplacement/resolution;
-F_mags = zeros(numOfOutputs,resolution);
-for idx = 1:resolution
-    %pause(0.01)
-   
-    p_TP = p_TP + [0,dh,0];
-    p_WC = p_WC + [0,dh,0];
-    
-    pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, dh);
-    pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, dh);
-    pUCA_PR = rotatePoint(pUCA_PR, pR_C, dh);
-    pR_PR = rotatePoint(pR_PR, pR_C, dh);
-    pR_S = rotatePoint(pR_S, pR_C, dh);
-    pTR_out = rotatePoint(pTR_out, pTR_in, dh);
-    %implement projection to find piot point of other points
-    %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    
-%% Computes Front Suspension Forces and Plots
-
-%%% COMPUTE FORCES HERE AND RECORD
-
-    % Recording Forces
-    F_mags(:,idx) = F_mag;
+% 
+% % BUMPING %%%%%%%%%%%%%%%%%%%%
+% % 2 inch (50.8mm) bump case
+% resolution = 25;%%
+% numOfOutputs = 6;
+% MAX_BUMP_DISPLACMENT = 2; %[in]
+% wheelDisplacement =  MAX_BUMP_DISPLACMENT*25.4; %[mm]
+% wheelDisps = linspace(0,wheelDisplacement, resolution);
+% dh = wheelDisplacement/resolution;
+% F_mags = zeros(numOfOutputs,resolution);
+% for idx = 1:resolution
+%     %pause(0.01)
+% 
+%     p_TP = p_TP + [0,dh,0];
+%     p_WC = p_WC + [0,dh,0];
+% 
+%     pU_UCA = rotatePoint(pU_UCA, pC_UCA_in, dh);
+%     pU_LCA = rotatePoint(pU_LCA, pC_LCA_in, dh);
+%     pUCA_PR = rotatePoint(pUCA_PR, pR_C, dh);
+%     pR_PR = rotatePoint(pR_PR, pR_C, dh);
+%     pR_S = rotatePoint(pR_S, pR_C, dh);
+%     pTR_out = rotatePoint(pTR_out, pTR_in, dh);
+%     %implement projection to find piot point of other points
+%     %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% 
+% %% Computes Front Suspension Forces and Plots
+% 
+% %%% COMPUTE FORCES HERE AND RECORD
+% 
+%     % Recording Forces
+%     F_mags(:,idx) = F_mag;
 
     %Setting up figure
     figure(1)
@@ -125,7 +125,6 @@ for idx = 1:resolution
     plot3(rockerPoints(:,1), rockerPoints(:,2), rockerPoints(:,3), 'DisplayName', 'Rocker')
 
     hold off;
-end
 
 
 

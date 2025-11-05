@@ -6,7 +6,7 @@ function f_TP = computeTirePatchForces(COM, totalMass, wheelBase, trackWidth, lo
     
     % Normalized COM x and z coordinates
     Cx = (COM(1)+trackWidth/2)/trackWidth;
-    Cz = (COM(1)+wheelBase/2)/wheelBase;
+    Cz = (COM(3)+wheelBase/2)/wheelBase;
     
     % Static weights on each wheel [kg]
     wS_FL = totalMass * Cx*Cz;

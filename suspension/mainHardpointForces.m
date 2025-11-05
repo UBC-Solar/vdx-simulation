@@ -17,8 +17,8 @@ else
 end
 
 %%%%%% Set side to compute and plot %%%%%
-side = "Right"; % (coordiante driving primary side)
-%side = "Left";
+%side = "Right"; % (coordiante driving primary side)
+side = "Left";
 %side = "Both";
 
 % (choose only Right or Left side to have forces table copied to clipboard to paste
@@ -30,7 +30,8 @@ side = "Right"; % (coordiante driving primary side)
 % Taken from SW VDX Skeleton and CG Estimate (April 23,2025)
 %COM = [150.08743630, 434.37602167, 47.72138612]; % mm [x,y,z]
 totalMass = 354.37; %kg
-trackWidth = 1270; %mm
+% trackWidth = 1270; %mm
+trackWidth = 1420; %mm 
 wheelBase = 2750; %mm
 g = 9.81; % gravatiational acceleration
 
