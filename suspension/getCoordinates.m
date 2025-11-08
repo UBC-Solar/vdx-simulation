@@ -1,10 +1,10 @@
-function p = getCoordinates()
+function p = getCoordinates(sheetName)
 % This script gets the coordinates from the "SW Hardpoints" Tab in the "V4 Vehicle Dynamics" Google Sheet File
 % Then, it assigns coordinates to the desired variables
 
     % Gets hardpoints from google sheets
     ID = '1C9o_FGi18w9rInHHT_hzzjyN-1102uIo5yY6cqIHfXk';
-    sheetName = 'ALTERED FORMAT - SW Hardpoints';
+    %sheetName = 'Copy of ALTERED FORMAT - SW Hardpoints';
     urlName = sprintf('https://docs.google.com/spreadsheets/d/%s/gviz/tq?tqx=out:csv&sheet=%s',ID, sheetName);
     data = webread(urlName);
     
