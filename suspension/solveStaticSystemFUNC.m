@@ -71,7 +71,7 @@ function hardpointForces = solveStaticSystemFUNC(hardpointCoordinates, tirePatch
     end
     
     % Shock unit direction vector
-    u_S = (p.C_S - p.R_C)/norm(p.C_S - p.R_C);
+    u_S = (p.C_S - p.R_S)/norm(p.C_S - p.R_S);
     
      % Moment about rocker chassis point
      dR_PR = p.R_PR - p.R_C;
