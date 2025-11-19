@@ -1,6 +1,18 @@
 function p = getCoordinates(sheetName)
-% This script gets the coordinates from the "SW Hardpoints" Tab in the "V4 Vehicle Dynamics" Google Sheet File
-% Then, it assigns coordinates to the desired variables
+% getCoordinates(sheetName)
+%
+%   INPUT:
+%       sheetName   (char or string)
+%           Name of the Google Sheets tab to read from.
+%
+%   OUTPUT:
+%       p           (struct)
+%           Struct with fields corresponding to each hardpoint name, with
+%           each field containing a 3-element position vector [X Y Z].
+%
+% This script gets the coordinates from the <sheetName> Tab in the "V4 Vehicle Dynamics" Google Sheet File
+% Then, it outputs a struct, p, containing all the coordiantes as 3D vectors.
+
 
     % Gets hardpoints from google sheets
     ID = '1C9o_FGi18w9rInHHT_hzzjyN-1102uIo5yY6cqIHfXk';

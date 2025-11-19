@@ -1,4 +1,4 @@
-function sw_view(mode, ax)
+function swView(mode, ax)
 % sw_view(mode, ax)
 % SolidWorks-like view controls in MATLAB.
 %

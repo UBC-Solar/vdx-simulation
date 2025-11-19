@@ -9,10 +9,10 @@ COM = [128.91, 439.31, -84.24];
 %%%%%% Set Loading Condition here! %%%%%%
 % regs: 2g bump, 1g brake, 1g corner
 % Our new standard: 4g bump, 2g brake, 1g corner
-loading.bump = 4; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+loading.bump = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
 loading.brake = 1;
-loading.corner = 2;
-loading.turnDirection = -1; %1:right, -1:left
+loading.corner = 1;
+loading.turnDirection = 1; %1:right, -1:left
 
 %%%%%% Set corner to compute and plot %%%%%
 % Note: right side is the coordiante driving side
@@ -48,9 +48,9 @@ F.(corner) = solveStaticSystemFUNC(P.(corner), f.(corner));
 displayForceVectors(F.(corner))
 
 %%%%%% Set Plot View %%%%%%
-sw_view('iso');
-% % type "help sw_view" in the command window for more information
-% % (or look at the sw_view.m file in suspension) 
+swView('iso');
+% % type "help swView" in the command window for more information
+% % (or look at the swView.m file in suspension) 
 setupSusFig(corner)
 plotLinks(P.(corner))
 hold off;
@@ -61,8 +61,8 @@ copyForceTableForGoogleDocs(F.(corner))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% FUNCTIONS
-%%%%%%%%%%%%%%%%%%%%%%%%%%
 function setupSusFig(corner)
+% Sets up figure a for plotting a corner of the suspension
     cornerKeys = ["FR", "FL", "RR", "RL"];
     cornerNames = ["Front Right", "Front Left", "Rear Right", "Rear Left"];
     cornerDict = dictionary(cornerKeys, cornerNames);
@@ -77,6 +77,8 @@ function setupSusFig(corner)
     grid on;
 end
 function displayForceVectors(struct)
+% displayForceVectors(struct) displays force vectors in a table shown in
+% the terminal.
     fields = fieldnames(struct);
     n = numel(fields);
     forceVectors = zeros(n, 3);
@@ -91,20 +93,8 @@ function displayForceVectors(struct)
     disp(newline)
 end
 
-% function displayVectorComponents(vectorNames)
-%     n = numel(vectorNames);
-%     components = zeros(n, 3);  % Preallocate matrix
-% 
-%     for i = 1:n
-%         forceVector(i, :) = evalin('base', vectorNames{i});
-%     end
-% 
-%     % Create table
-%     disp(array2table(components, 'VariableNames', {'X', 'Y', 'Z'}, 'RowNames', vectorNames));
-% end
-
-%% Forces to table functions
 function copyForceTableForGoogleDocs(struct)
+% Forces to table functions
 % Copy tab-delimited force table with headers to clipboard for Google Docs
 
 
