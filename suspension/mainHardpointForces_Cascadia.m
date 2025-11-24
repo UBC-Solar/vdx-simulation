@@ -16,7 +16,7 @@ loading.turnDirection = 1; %1:right, -1:left
 
 %%%%%% Set corner to compute and plot %%%%%
 % Note: right side is the coordiante driving side
-corner = "FR";
+corner = "FL";
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
