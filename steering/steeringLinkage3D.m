@@ -1,9 +1,9 @@
 %[text]{"align":"center"} # **3D Steering Linkage Simulation**
-%[text]{"align":"center"}
+%[text]{"align":"center"} 
 %[text] This script allows changing of steering linkage parameters and reflects these changes in visuals and plots.
 %[text] To view everything simultaneously, select 'Hide Code', and zoom out using `ctrl +` \[`-`\]
-%[text]
-%% Base Values %%
+%[text] 
+%[text] #### Initialization + UI
 clear; format shortG;
 
 % Constants
@@ -42,8 +42,10 @@ maxYokeNeg = -maxYoke;
 yokeAngle = -1 *0; % shown sign is flipped %[control:slider:0bfe]{"position":[17,18]}
 computeSupplementary = true;
 forceFit = false;
-%[text]
-tp.KP_WC = getPtOnAxis(tp.UBJ, tp.LBJ, wheelRadius);
+%[text] 
+%[text] #### Calculation
+tp.KP = getPtOnAxis(tp.UBJ, tp.LBJ, wheelRadius);
+tp.spindle = [0; tp.KP(2); tp.KP(3)];
 tp.KP_SA = getPtOnAxis(tp.UBJ, tp.LBJ, SAz0);   % place to apply SAvec from
 tp.SA_TR = tp.KP_SA + [SAvec(1); SAvec(2); 0];  % str arm-tie rod node
 
@@ -55,7 +57,8 @@ sNodes.TP = [0.5*wheelbase; 0.5*trackwidth; 0];
 sNodes.WC = sNodes.TP + [0; 0; wheelRadius];
 sNodes.UBJ = sNodes.TP + tp.UBJ;
 sNodes.LBJ = sNodes.TP + tp.LBJ;
-sNodes.KP_WC = sNodes.TP + tp.KP_WC;
+sNodes.KP = sNodes.TP + tp.KP;
+sNodes.spindle = sNodes.TP + tp.spindle;
 sNodes.KP_SA = sNodes.TP + tp.KP_SA;
 sNodes.SA_TR = sNodes.TP + tp.SA_TR;
 sNodes.ER_TR = ERaxisFun(0);
@@ -63,8 +66,8 @@ sNodes.ER_TR = ERaxisFun(0);
 % Main
 [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, findRackPos(yokeAngle));
 renderLinkage(dNodes, SApathFun);
-%[text]
-%% FUNCTIONS %%
+%[text] 
+%[text] #### Solve Dynamic Linkage Positions
 function [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, rackShift)
 % Contraints for geometry solve
 tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR);
@@ -93,33 +96,60 @@ spin = fzero(fun, pathDomain);  % [rad]
 dNodes.SA_TR = SApathFun(spin);
 dNodes.TP = rotAboutAxis(KPaxisFun, sNodes.TP, spin);
 dNodes.WC = rotAboutAxis(KPaxisFun, sNodes.WC, spin);
+dNodes.spindle = rotAboutAxis(KPaxisFun, sNodes.spindle, spin);
 dNodes.TP = rotAboutAxis(KPaxisFun, sNodes.TP, spin);
 
 dNodes.UBJ = sNodes.UBJ;
 dNodes.LBJ = sNodes.LBJ;
-dNodes.KP_WC = sNodes.KP_WC;
+dNodes.KP = sNodes.KP;
 dNodes.KP_SA = sNodes.KP_SA;
 end
-
-
+%[text] 
+%[text] #### Render Linkage Diagram
 function renderLinkage(nodes, SApathFun)
-linkage = [nodes.TP nodes.WC nodes.KP_WC nodes.KP_SA nodes.SA_TR nodes.ER_TR];  % linkage members
+linkage = [nodes.TP, nodes.WC, nodes.spindle, nodes.KP, nodes.KP_SA, nodes.SA_TR, nodes.ER_TR];  % linkage members
 balljoint = [nodes.UBJ nodes.LBJ];                                              % kingpin
 ringThetas = linspace(-pi, pi, 64); ring = zeros(3, length(ringThetas));        % steering arm path
 for i=1:length(ringThetas)
     ring(:,i) = SApathFun(ringThetas(i));
 end
 
+close all
+figure(Visible='on') % pop out
 clf
+
 plot3(balljoint(1,:), balljoint(2,:), balljoint(3,:), 'bx--');
 hold on
-plot3(ring(1,:), ring(2,:), ring(3,:), 'y:')
+plot3(ring(1,:), ring(2,:), ring(3,:), 'm:')
 plot3(linkage(1,:), linkage(2,:), linkage(3,:), 'r', LineWidth=2)
+renderTires(nodes.TP, nodes.WC, nodes.spindle)
+axis equal
+xticks(''); yticks(''); zticks('');
 xlabel('X (longitudinal)'); ylabel('Y (lateral)'); zlabel('Z (vertical)');
-
-
-return
 end
+
+function renderTires(tirePatch, wheelCenter, spindleEnd)
+arguments
+    tirePatch   (3,:) double
+    wheelCenter (3,:) double
+    spindleEnd  (3,:) double
+end
+assert(isequal(size(tirePatch), size(wheelCenter), size(spindleEnd)))
+
+thetas = linspace(0, 2*pi, 128);
+
+for num=1:size(tirePatch, 2)
+    v = @(t) spindleEnd(:,num) + t*(wheelCenter(:,num) - spindleEnd(:,num));
+    tp = tirePatch(:,num);
+    sweep = getRevolvePath(v, tp);
+    pts = zeros(3, numel(thetas));
+    for k = 1:numel(thetas)
+        pts(:,k) = sweep(thetas(k));
+    end
+    fill3(pts(1,:), pts(2,:), pts(3,:), 'k', 'FaceAlpha', 0.1);
+end
+end
+
 
 %[appendix]{"version":"1.0"}
 %---
