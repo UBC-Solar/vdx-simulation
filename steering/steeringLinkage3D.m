@@ -4,7 +4,7 @@
 %[text] To view everything simultaneously, select 'Hide Code', and zoom out using `ctrl +` \[`-`\]
 %[text] 
 %[text] #### Initialization + UI
-clear; format shortG;
+clear; format shortG; close all;
 
 % Constants
 car = CarV4();
@@ -25,7 +25,7 @@ tp.LBJ = sw2iso(swLBJ);
 % Flexible Parameters
 ERz = 500;          % extension rod Z %[control:editfield:97ad]{"position":[7,10]}
 SAz0 = 500;         % steering arm Z      %[control:editfield:92b7]{"position":[8,11]}
-SAvec = [-200 -100];        % [X-inset, Y-inset] %[control:editfield:45fc]{"position":[9,20]}
+SAvec = [-150 -40];        % [X-inset, Y-inset] %[control:editfield:45fc]{"position":[9,19]}
 setback = 400;      % X dist, ER axis to WC %[control:editfield:0f8d]{"position":[11,14]}
 ERconnectionLen = 350; %[control:editfield:8d5f]{"position":[19,22]}
 
@@ -39,7 +39,7 @@ maxMovementNeg = -maxMovement;
 maxYoke = floor(findYokeAngle(maxMovement)*10)/10;
 maxYokeNeg = -maxYoke;
 
-yokeAngle = -1 *0; % shown sign is flipped %[control:slider:0bfe]{"position":[17,18]}
+yokeAngle = -1 *0;  % shown sign is flipped %[control:slider:0bfe]{"position":[17,18]}
 computeSupplementary = true;
 forceFit = false;
 %[text] 
@@ -50,9 +50,6 @@ tp.KP_SA = getPtOnAxis(tp.UBJ, tp.LBJ, SAz0);   % place to apply SAvec from
 tp.SA_TR = tp.KP_SA + [SAvec(1); SAvec(2); 0];  % str arm-tie rod node
 
 
-
-ERaxisFun = @(dy) [0.5*wheelbase - setback; 0.5*ERconnectionLen; ERz] + dy*[0;1;0];
-
 sNodes.TP = [0.5*wheelbase; 0.5*trackwidth; 0];
 sNodes.WC = sNodes.TP + [0; 0; wheelRadius];
 sNodes.UBJ = sNodes.TP + tp.UBJ;
@@ -61,15 +58,33 @@ sNodes.KP = sNodes.TP + tp.KP;
 sNodes.spindle = sNodes.TP + tp.spindle;
 sNodes.KP_SA = sNodes.TP + tp.KP_SA;
 sNodes.SA_TR = sNodes.TP + tp.SA_TR;
-sNodes.ER_TR = ERaxisFun(0);
 
-% Main
-figure
-[dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, findRackPos(yokeAngle));
-renderLinkage(dNodes, SApathFun);
+sNodesStarboard = structfun(@(v) [v(1); -v(2); v(3)], sNodes, UniformOutput=false);  % flip
+
+ERaxisFun = @(dy) [0.5*wheelbase - setback; 0.5*ERconnectionLen; ERz] + dy*[0;1;0];
+ERaxisFunStarboard = @(dy) ERaxisFun(dy) - [0; ERconnectionLen; 0];
+sNodes.ER_TR = ERaxisFun(0);
+sNodesStarboard.ER_TR = ERaxisFunStarboard(0);
+
+% prep plot
+figure(Visible='on') % pop out
+clf
+view(3)
+hold on
+
+% calc and plot
+[nodesPort, spinPort, SApathFunPort] = solveNodes(sNodes, ERaxisFun, findRackPos(yokeAngle), 1);
+renderLinkage(nodesPort, SApathFunPort);
+[nodesStarboard, spinStarboard, SApathFunPort] = solveNodes(sNodesStarboard, ERaxisFunStarboard, findRackPos(yokeAngle), -1);
+renderLinkage(nodesStarboard, SApathFunPort);
+
+% post process
+connectPts([nodesPort.ER_TR, nodesStarboard.ER_TR], 'm-', LineWidth=2)
+plot3(0.5*wheelbase-setback, 0, ERz, 'k|', LineWidth=3)
+addFloorPlane(gca)
 %[text] 
 %[text] #### Solve Dynamic Linkage Positions
-function [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, rackShift)
+function [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, rackShift, isPort)
 
 % Contraints for geometry solve
 tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR);
@@ -77,9 +92,10 @@ KPaxisFun = @(t) sNodes.LBJ + t*((sNodes.UBJ - sNodes.LBJ) / norm(sNodes.UBJ - s
 SApathFun = getRevolvePath(KPaxisFun, sNodes.SA_TR);
 
 dNodes.ER_TR = ERaxisFun(rackShift);
-slack = @(theta) tieRodLen - norm(SApathFun(theta) - dNodes.ER_TR);  % key function
+slack = @(theta) tieRodLen - norm(SApathFun(isPort*theta) - dNodes.ER_TR);  % key function
 
-switch sign(rackShift)
+
+switch sign(rackShift) * isPort
     case 0  % static pos
         dNodes = sNodes;
         spin = 0;
@@ -96,13 +112,13 @@ switch sign(rackShift)
 end
 
 % debug
-tt = linspace(-pi, pi, 256);
-plot(tt, arrayfun(@(t) slack(t),tt));
-xline(pathDomain, 'k--')
-yline(0, 'r--')
+%tt = linspace(-pi, pi, 256);
+%plot(tt, arrayfun(@(t) slack(t),tt));
+%xline(pathDomain, 'k--')
+%yline(0, 'r--')
 
 % Solve
-spin = fzero(slack, pathDomain);  % [rad]
+spin = isPort*fzero(slack, pathDomain);  % [rad]
 
 dNodes.SA_TR = SApathFun(spin);
 dNodes.TP = rotAboutAxis(KPaxisFun, sNodes.TP, spin);
@@ -118,28 +134,25 @@ end
 %[text] 
 %[text] #### Render Linkage Diagram
 function renderLinkage(nodes, SApathFun)
-linkage = [nodes.TP, nodes.WC, nodes.spindle, nodes.KP, nodes.KP_SA, nodes.SA_TR, nodes.ER_TR];  % linkage members
-balljoint = [nodes.UBJ nodes.LBJ];                                                               % kingpin
-ringThetas = linspace(-pi, pi, 64); ring = zeros(3, length(ringThetas));                         % steering arm path
+ringThetas = linspace(-pi, pi, 64); ring = zeros(3, length(ringThetas));
 for i=1:length(ringThetas)
     ring(:,i) = SApathFun(ringThetas(i));
 end
 
-%close all
-figure(Visible='on') % pop out
-clf
+connectPts([nodes.WC, nodes.spindle], 'r-', LineWidth=2)  % spindle/tire
+connectPts([nodes.spindle, nodes.KP, nodes.KP_SA, nodes.SA_TR], 'r-', LineWidth=2);  % upright
+connectPts([nodes.SA_TR, nodes.ER_TR], 'b-', LineWidth=2);  % tie rod
+connectPts([nodes.UBJ, nodes.LBJ], 'kx--');   % kingpin
+connectPts(ring, 'g:')                        % steering arm path
 
-plot3(balljoint(1,:), balljoint(2,:), balljoint(3,:), 'bx--');
-hold on
-plot3(ring(1,:), ring(2,:), ring(3,:), 'm:')
-plot3(linkage(1,:), linkage(2,:), linkage(3,:), 'r', LineWidth=2)
-renderTires(nodes.TP, nodes.WC, nodes.spindle)
+renderTire(nodes.TP, nodes.WC, nodes.spindle)
 axis equal
 xticks(''); yticks(''); zticks('');
 xlabel('X (longitudinal)'); ylabel('Y (lateral)'); zlabel('Z (vertical)');
 end
 
-function renderTires(tirePatch, wheelCenter, spindleEnd)
+
+function renderTire(tirePatch, wheelCenter, spindleEnd)
 arguments
     tirePatch   (3,:) double
     wheelCenter (3,:) double
@@ -157,7 +170,47 @@ for num=1:size(tirePatch, 2)
     for k = 1:numel(thetas)
         pts(:,k) = sweep(thetas(k));
     end
-    fill3(pts(1,:), pts(2,:), pts(3,:), 'k', 'FaceAlpha', 0.1);
+    fill3(pts(1,:), pts(2,:), pts(3,:), 'k', FaceAlpha=0.05);
+end
+end
+
+
+function addFloorPlane(fig)
+    [X, Y, Z] = getCorners(fig);
+    hPlane = fill3(fig, X, Y, Z, 'k', FaceAlpha=0.2);
+    addlistener(fig, 'XLim', PostSet=@updatePlane);
+    addlistener(fig, 'YLim', PostSet=@updatePlane);
+    
+    function [X, Y, Z] = getCorners(fig)
+        xl = fig.XLim;
+        yl = fig.YLim;
+        X = [xl(1) xl(2) xl(2) xl(1)];
+        Y = [yl(1) yl(1) yl(2) yl(2)];
+        Z = zeros(1,4);
+    end
+
+    function updatePlane(~,~)
+        [X, Y, Z] = getCorners(fig);
+        hPlane.XData = X;
+        hPlane.YData = Y;
+        hPlane.ZData = zeros(1,4);
+    end
+end
+
+
+function connectPts(matrix, LineSpec, opts)
+arguments
+    matrix (3,:) double
+    LineSpec string
+    opts.LineWidth (1,1) {mustBeNumeric} = 1
+end
+switch size(matrix,1)
+    case 2
+        plot(matrix(1,:), matrix(2,:), LineSpec, LineWidth=opts.LineWidth);
+    case 3
+        plot3(matrix(1,:), matrix(2,:), matrix(3,:), LineSpec, LineWidth=opts.LineWidth);
+    otherwise
+        error('huh')
 end
 end
 
