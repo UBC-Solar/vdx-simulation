@@ -26,7 +26,7 @@ tp.LBJ = sw2iso(swLBJ);
 ERz = 500;          % extension rod Z %[control:editfield:97ad]{"position":[7,10]}
 SAz0 = 500;         % steering arm Z      %[control:editfield:92b7]{"position":[8,11]}
 SAvec = [-200 -100];        % [X-inset, Y-inset] %[control:editfield:45fc]{"position":[9,20]}
-setback = 600;      % X dist, ER axis to WC %[control:editfield:0f8d]{"position":[11,14]}
+setback = 400;      % X dist, ER axis to WC %[control:editfield:0f8d]{"position":[11,14]}
 ERconnectionLen = 350; %[control:editfield:8d5f]{"position":[19,22]}
 
 
@@ -64,34 +64,45 @@ sNodes.SA_TR = sNodes.TP + tp.SA_TR;
 sNodes.ER_TR = ERaxisFun(0);
 
 % Main
+figure
 [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, findRackPos(yokeAngle));
 renderLinkage(dNodes, SApathFun);
 %[text] 
 %[text] #### Solve Dynamic Linkage Positions
 function [dNodes, spin, SApathFun] = solveNodes(sNodes, ERaxisFun, rackShift)
+
 % Contraints for geometry solve
 tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR);
 KPaxisFun = @(t) sNodes.LBJ + t*((sNodes.UBJ - sNodes.LBJ) / norm(sNodes.UBJ - sNodes.LBJ));
 SApathFun = getRevolvePath(KPaxisFun, sNodes.SA_TR);
 
+dNodes.ER_TR = ERaxisFun(rackShift);
+slack = @(theta) tieRodLen - norm(SApathFun(theta) - dNodes.ER_TR);  % key function
+
 switch sign(rackShift)
-    case 0
+    case 0  % static pos
         dNodes = sNodes;
         spin = 0;
         return
-    case 1
-        pathDomain = [-pi 0];  % steering arm swings CW
-    case -1
-        pathDomain = [0 pi];   % steering arm swings CCW
+    case 1  % steering arm swings CW (rack is approaching)
+        thetaNegative = fminbnd(@(t) slack(t), -pi, 0);
+        pathDomain = [thetaNegative 0];
+    case -1  % steering arm swings CCW (rack is retreating)
+        thetaPositive = fminbnd(@(t) -slack(t), 0, pi);  % closest pt on arc to ER_TR
+        if slack(thetaPositive) < 0
+            error("No upright orientation satifies %f mm rack position!\nLinkage overextended!", rackShift)
+        end
+        pathDomain = [0 thetaPositive];
 end
 
-% Solve contraints
-
-dNodes.ER_TR = ERaxisFun(rackShift);
+% debug
+tt = linspace(-pi, pi, 256);
+plot(tt, arrayfun(@(t) slack(t),tt));
+xline(pathDomain, 'k--')
+yline(0, 'r--')
 
 % Solve
-fun = @(theta) tieRodLen - norm(SApathFun(theta) - dNodes.ER_TR);
-spin = fzero(fun, pathDomain);  % [rad]
+spin = fzero(slack, pathDomain);  % [rad]
 
 dNodes.SA_TR = SApathFun(spin);
 dNodes.TP = rotAboutAxis(KPaxisFun, sNodes.TP, spin);
@@ -108,13 +119,13 @@ end
 %[text] #### Render Linkage Diagram
 function renderLinkage(nodes, SApathFun)
 linkage = [nodes.TP, nodes.WC, nodes.spindle, nodes.KP, nodes.KP_SA, nodes.SA_TR, nodes.ER_TR];  % linkage members
-balljoint = [nodes.UBJ nodes.LBJ];                                              % kingpin
-ringThetas = linspace(-pi, pi, 64); ring = zeros(3, length(ringThetas));        % steering arm path
+balljoint = [nodes.UBJ nodes.LBJ];                                                               % kingpin
+ringThetas = linspace(-pi, pi, 64); ring = zeros(3, length(ringThetas));                         % steering arm path
 for i=1:length(ringThetas)
     ring(:,i) = SApathFun(ringThetas(i));
 end
 
-close all
+%close all
 figure(Visible='on') % pop out
 clf
 
