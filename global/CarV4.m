@@ -23,13 +23,13 @@ classdef CarV4 < SolarCar
         % Rack & Pinion (Kaz Tech)
         RPwidth = (15.225+2*0.8) * 25.4 % inch → mm
         Cfactor = (4.71) * 25.4         % inch/rev → mm/rev
-        RPmaxTravel = (4+5/8) * 25.4    % inch → mm
+        RPmaxTravel = 82.55    % inch → mm
 
         % Wheel (Battlax SC 100/80-16 M/C 50P TL)
         WheelRadius = 566/2             % mm
         WheelCurvature = 54             % mm (radius)
         TirePressure = 65 / 145         % psi → N/mm²
-        WheelStiffness = 115            % N/mm (50?)
+        WheelStiffness = 115            % N/mm (50?) doi:10.1088/1757-899X/776/1/012071
 
         % Driving Surface
         RoadCrown = deg2rad(2)          % radians
