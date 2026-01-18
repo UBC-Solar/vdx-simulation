@@ -14,6 +14,8 @@ SAvec = [-160,  -45];         % Steering arm offset [X-inset, Y-inset] %[control
 ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:945c]{"position":[19,21]}
 setback = 340;              % X distance, ER axis to WC %[control:editfield:0c75]{"position":[11,14]}
 
+  %[control:button:85d2]{"position":[1,2]}
+
 % Load shared geometry configuration
 steeringGeometry;
 
@@ -22,11 +24,51 @@ yokeAngle =0;  % Steer input [degrees], positive = right turn %[control:slider:6
 
 turningDir = -sign(yokeAngle);
 
-%% Solve Linkage Geometry
+% Solve Linkage Geometry
+
+susTravel = "droop" %[control:dropdown:1b3d]{"position":[13,20]}
+
+tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR); % at static regardless
+if ~strcmp(susTravel, "static")
+    switch susTravel
+        case "droop"
+            jNodes.UBJ = sNodes.TP + sw2iso([-185 600 -29.23]);  %jounceNodes
+            jNodes.LBJ = sNodes.TP + sw2iso([-60 150 -8.33]);
+        case "bump"
+            jNodes.UBJ = sNodes.TP + sw2iso([-185 674 -31.44]);
+            jNodes.LBJ = sNodes.TP + sw2iso([-60 224.93 -6.3]);
+    end
+    vStatic = sNodes.UBJ([1,3]) - sNodes.LBJ([1,3]);
+    vJounce = jNodes.UBJ([1,3]) - jNodes.LBJ([1,3]);
+
+    theta = atan2(vJounce(2), vJounce(1)) - atan2(vStatic(2), vStatic(1));
+
+    R2 = [cos(theta) -sin(theta); sin(theta) cos(theta)];
+    sCentroid = (sNodes.UBJ([1,3]) + sNodes.LBJ([1,3])) / 2;
+    jCentroid = (jNodes.UBJ([1,3]) + jNodes.LBJ([1,3])) / 2;
+    T2 = jCentroid - (R2 * sCentroid);
+
+    M = eye(3); M([1 3], [1,3]) = R2;
+    D = zeros(3,1); D([1,3]) = T2;
+    jounce = @(p) (M * p(:) + D);
+
+    sNodes.TP = jounce(sNodes.TP);
+    sNodes.WC = jounce(sNodes.WC);
+    sNodes.KP = jounce(sNodes.KP);
+    sNodes.spindle = jounce(sNodes.spindle);
+    sNodes.KP_SA = jounce(sNodes.KP_SA);
+    sNodes.SA_TR = jounce(sNodes.SA_TR);
+    sNodes.UBJ = jNodes.UBJ;
+    sNodes.LBJ = jNodes.LBJ;
+
+    sNodesStarboard = structfun(@(v) [v(1); -v(2); v(3)], sNodes, UniformOutput=false);
+    sNodesStarboard.ER_TR = ERaxisFunStarboard(0);
+end
+
 [nodesPort, spinPort, SApathFunPort] = ...
-    solveSteeringLinkage(car, sNodes, ERaxisFun, findRackPos(yokeAngle), 1);
+    solveSteeringLinkage(car, sNodes, ERaxisFun, findRackPos(yokeAngle), 1, tieRodLen=tieRodLen);
 [nodesStarboard, spinStarboard, SApathFunStarboard] = ...
-    solveSteeringLinkage(car, sNodesStarboard, ERaxisFunStarboard, findRackPos(yokeAngle), -1);
+    solveSteeringLinkage(car, sNodesStarboard, ERaxisFunStarboard, findRackPos(yokeAngle), -1, tieRodLen=tieRodLen);
 
 % Calculate steer angles
 deltaL = getDelta(nodesPort.WC, nodesPort.spindle);
@@ -52,7 +94,6 @@ connectPts([nodesPort.TP, nodesStarboard.TP], 'k.');           % New contact poi
 addFloorPlane(gca);                                            % Gray floor
 
 title(sprintf('Steering Linkage @ %.1f° Yoke', yokeAngle));
-
 %% 2D Ackermann Analysis
 figure();
 clf; hold on; axis equal;
@@ -201,19 +242,25 @@ end
 %[appendix]{"version":"1.0"}
 %---
 %[metadata:view]
-%   data: {"layout":"hidecode"}
+%   data: {"layout":"inline"}
 %---
 %[control:editfield:4126]
-%   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"SectionToEnd","valueType":"MATLAB code"}
+%   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"Nothing","valueType":"MATLAB code"}
 %---
 %[control:editfield:945c]
-%   data: {"defaultValue":0,"label":"Extension rod connection length","run":"SectionToEnd","valueType":"Double"}
+%   data: {"defaultValue":0,"label":"Extension rod connection length","run":"Nothing","valueType":"Double"}
 %---
 %[control:editfield:0c75]
-%   data: {"defaultValue":0,"label":"X distance, ER axis to WC","run":"SectionToEnd","valueType":"Double"}
+%   data: {"defaultValue":0,"label":"X distance, ER axis to WC","run":"Nothing","valueType":"Double"}
+%---
+%[control:button:85d2]
+%   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:slider:679b]
 %   data: {"defaultValue":0,"label":"Yoke Position","max":169.7,"maxLinkedVariable":"maxYoke","min":-169.7,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
+%---
+%[control:dropdown:1b3d]
+%   data: {"defaultValue":"\"static\"","itemLabels":["bump","static","droop"],"items":["\"bump\"","\"static\"","\"droop\""],"label":"Drop down","run":"AllSections"}
 %---
 %[control:statebutton:90f0]
 %   data: {"defaultValue":false,"label":"Toggle Plot Zoom","run":"Section"}

@@ -1,4 +1,4 @@
-function [dNodes, spin, SApathFun] = solveSteeringLinkage(car, sNodes, ERaxisFun, rackShift, isPort)
+function [dNodes, spin, SApathFun] = solveSteeringLinkage(car, sNodes, ERaxisFun, rackShift, isPort, options)
 % solveSteeringLinkage - Solve dynamic linkage positions for a given rack shift
 %
 %   [dNodes, spin, SApathFun] = solveSteeringLinkage(car, sNodes, ERaxisFun, rackShift, isPort)
@@ -23,10 +23,15 @@ arguments
     ERaxisFun function_handle
     rackShift (1,1) double
     isPort (1,1) double {mustBeMember(isPort, [-1, 1])}
+    options.tieRodLen (1,1) double = NaN
 end
 
 % Constraints for geometry solve
-tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR);
+if isnan(options.tieRodLen)
+    tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR);
+else
+    tieRodLen = options.tieRodLen;
+end
 KPaxisFun = @(t) sNodes.LBJ + t*((sNodes.UBJ - sNodes.LBJ) / norm(sNodes.UBJ - sNodes.LBJ));
 SApathFun = getRevolvePath(KPaxisFun, sNodes.SA_TR);
 
