@@ -63,7 +63,7 @@ end
 
 a = semiMajorAxis;
 bFun = @(x) torusY(x, deformationPos);
-K = car.WheelStiffness; % tire stiffness N/mm^2
+K = car.WheelStiffness; % tire stiffness N/mm
 A = contactPatch;
 
 Q = 2*K/A * tan(alpha) * integral(@(x) (2*a-x).*bFun(x), 0, 2*a);
