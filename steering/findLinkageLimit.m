@@ -37,5 +37,6 @@ slackAtRack = @(rackShift) tieRodLen - norm(SApathFun(minDistToER(rackShift)) - 
 criticalRackPos = fzero(slackAtRack, [-200, 0]);
 
 % Convert to yoke angle
-maxYoke = findYokeAngle(criticalRackPos);
+car = CarV4();
+maxYoke = min(findYokeAngle(criticalRackPos), findYokeAngle(car.RPmaxTravel));
 end

@@ -20,11 +20,12 @@ clear; format shortG; close all;
 % Load shared geometry configuration
 
 
-SAvec = [-160,  -45];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,21]}
-ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
-setback = 340;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
+SAvec = [-100,  -18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,21]}
+ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
+setback = 390;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
 steeringGeometry;
 
+  %[control:button:4228]{"position":[1,2]}
 
 % Analysis Parameters
 twoSided = false; %[control:statebutton:816f]{"position":[12,17]}
@@ -175,19 +176,22 @@ grid on;
 %[appendix]{"version":"1.0"}
 %---
 %[metadata:view]
-%   data: {"layout":"hidecode"}
+%   data: {"layout":"inline"}
 %---
 %[control:editfield:4e3c]
-%   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"SectionToEnd","valueType":"MATLAB code"}
+%   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"Nothing","valueType":"MATLAB code"}
 %---
 %[control:editfield:209a]
-%   data: {"defaultValue":0,"label":"Extension rod connection length","run":"SectionToEnd","valueType":"Double"}
+%   data: {"defaultValue":0,"label":"Extension rod connection length","run":"Nothing","valueType":"Double"}
 %---
 %[control:editfield:9564]
-%   data: {"defaultValue":0,"label":"X distance, ER axis to WC","run":"SectionToEnd","valueType":"Double"}
+%   data: {"defaultValue":0,"label":"X distance, ER axis to WC","run":"Nothing","valueType":"Double"}
+%---
+%[control:button:4228]
+%   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:statebutton:816f]
-%   data: {"defaultValue":false,"label":"Toggle Symmetric Travel","run":"Section"}
+%   data: {"defaultValue":false,"label":"Toggle Symmetric Travel","run":"AllSections"}
 %---
 %[control:slider:24b5]
 %   data: {"defaultValue":7,"label":"Resolution (2^n)","max":12,"min":4,"run":"AllSections","runOn":"ValueChanged","step":1}

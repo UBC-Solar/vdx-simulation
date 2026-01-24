@@ -19,7 +19,7 @@ tp.LBJ = sw2iso(swLBJstatic);
 
 % Flexible Steering Linkage Parameters
 ERz = 660;                  % Extension rod Z height [mm]
-SAz0 = 660;                 % Steering arm Z height [mm]
+SAz0 = 680;                 % Steering arm Z height [mm]
 %SAvec = [0 0];             % Steering arm offset [X-inset, Y-inset] [mm]
 %setback = 0;               % X distance, ER axis to WC [mm]
 %ERconnectionLen = 0;       % Extension rod connection length [mm]

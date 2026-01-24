@@ -10,9 +10,9 @@
 %% Initialize Geometry
 clear; format shortG; close all;
 
-SAvec = [-160,  -45];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,21]}
-ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:945c]{"position":[19,21]}
-setback = 340;              % X distance, ER axis to WC %[control:editfield:0c75]{"position":[11,14]}
+SAvec = [-100,  -18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,21]}
+ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:945c]{"position":[19,21]}
+setback = 390;              % X distance, ER axis to WC %[control:editfield:0c75]{"position":[11,14]}
 
   %[control:button:85d2]{"position":[1,2]}
 
@@ -26,7 +26,7 @@ turningDir = -sign(yokeAngle);
 
 % Solve Linkage Geometry
 
-susTravel = "droop" %[control:dropdown:1b3d]{"position":[13,20]}
+susTravel = "static" %[control:dropdown:1b3d]{"position":[13,21]}
 
 tieRodLen = norm(sNodes.ER_TR - sNodes.SA_TR); % at static regardless
 if ~strcmp(susTravel, "static")
@@ -121,7 +121,7 @@ if turningDir ~= 0
 end
 
 % Zoom control
-zoomIn = true; %[control:statebutton:90f0]{"position":[10,14]}
+zoomIn = false; %[control:statebutton:90f0]{"position":[10,15]}
 switch zoomIn
     case true
         xlim(zoomedX);
@@ -242,7 +242,7 @@ end
 %[appendix]{"version":"1.0"}
 %---
 %[metadata:view]
-%   data: {"layout":"inline"}
+%   data: {"layout":"hidecode"}
 %---
 %[control:editfield:4126]
 %   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"Nothing","valueType":"MATLAB code"}
@@ -257,7 +257,7 @@ end
 %   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:slider:679b]
-%   data: {"defaultValue":0,"label":"Yoke Position","max":169.7,"maxLinkedVariable":"maxYoke","min":-169.7,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
+%   data: {"defaultValue":0,"label":"Yoke Position","max":117,"maxLinkedVariable":"maxYoke","min":-117,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
 %---
 %[control:dropdown:1b3d]
 %   data: {"defaultValue":"\"static\"","itemLabels":["bump","static","droop"],"items":["\"bump\"","\"static\"","\"droop\""],"label":"Drop down","run":"AllSections"}

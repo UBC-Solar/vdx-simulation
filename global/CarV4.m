@@ -7,7 +7,7 @@ classdef CarV4 < SolarCar
 
         % Car
         Name = 'Cascadia'
-        Wheelbase = 2750                % mm
+        Wheelbase = 2600                % mm
         Trackwidth = 1270               % mm
         RawMass = 220                   % kg
         MinDriverMass = 80              % kg
