@@ -9,9 +9,9 @@ COM = [128.91, 439.31, -84.24];
 %%%%%% Set Loading Condition here! %%%%%%
 % regs: 2g bump, 1g brake, 1g corner
 % Our new standard: 4g bump, 2g brake, 1g corner
-loading.bump = 2; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
-loading.brake = 1;
-loading.corner = 1;
+loading.bump = 1; %bump should >= 1 (no bump would be bumpG = 1 for static weight)
+loading.brake = 0.5;
+loading.corner = 0.5;
 loading.turnDirection = 1; %1:right, -1:left
 
 %%%%%% Set corner to compute and plot %%%%%
