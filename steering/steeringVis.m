@@ -10,7 +10,7 @@
 %% Initialize Geometry
 clear; format shortG; close all;
 
-SAvec = [-100,  -18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,21]}
+SAvec = [-100,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,20]}
 ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:945c]{"position":[19,21]}
 setback = 390;              % X distance, ER axis to WC %[control:editfield:0c75]{"position":[11,14]}
 
@@ -257,7 +257,7 @@ end
 %   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:slider:679b]
-%   data: {"defaultValue":0,"label":"Yoke Position","max":117,"maxLinkedVariable":"maxYoke","min":-117,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
+%   data: {"defaultValue":0,"label":"Yoke Position","max":222.5,"maxLinkedVariable":"maxYoke","min":-222.5,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
 %---
 %[control:dropdown:1b3d]
 %   data: {"defaultValue":"\"static\"","itemLabels":["bump","static","droop"],"items":["\"bump\"","\"static\"","\"droop\""],"label":"Drop down","run":"AllSections"}

@@ -20,7 +20,7 @@ clear; format shortG; close all;
 % Load shared geometry configuration
 
 
-SAvec = [-100,  -18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,21]}
+SAvec = [-100,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,20]}
 ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
 setback = 390;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
 steeringGeometry;
@@ -176,7 +176,7 @@ grid on;
 %[appendix]{"version":"1.0"}
 %---
 %[metadata:view]
-%   data: {"layout":"inline"}
+%   data: {"layout":"hidecode"}
 %---
 %[control:editfield:4e3c]
 %   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"Nothing","valueType":"MATLAB code"}
