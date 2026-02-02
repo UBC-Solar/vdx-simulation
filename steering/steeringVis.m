@@ -33,10 +33,10 @@ if ~strcmp(susTravel, "static")
     switch susTravel
         case "droop"
             jNodes.UBJ = sNodes.TP + sw2iso([-185 600 -29.23]);  %jounceNodes
-            jNodes.LBJ = sNodes.TP + sw2iso([-60 150 -8.33]);
+            jNodes.LBJ = sNodes.TP + sw2iso([-80 150 -8.33]);
         case "bump"
             jNodes.UBJ = sNodes.TP + sw2iso([-185 674 -31.44]);
-            jNodes.LBJ = sNodes.TP + sw2iso([-60 224.93 -6.3]);
+            jNodes.LBJ = sNodes.TP + sw2iso([-80 224.93 -6.3]);
     end
     vStatic = sNodes.UBJ([1,3]) - sNodes.LBJ([1,3]);
     vJounce = jNodes.UBJ([1,3]) - jNodes.LBJ([1,3]);
@@ -257,7 +257,7 @@ end
 %   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:slider:679b]
-%   data: {"defaultValue":0,"label":"Yoke Position","max":222.5,"maxLinkedVariable":"maxYoke","min":-222.5,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
+%   data: {"defaultValue":0,"label":"Yoke Position","max":224.4,"maxLinkedVariable":"maxYoke","min":-224.4,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
 %---
 %[control:dropdown:1b3d]
 %   data: {"defaultValue":"\"static\"","itemLabels":["bump","static","droop"],"items":["\"bump\"","\"static\"","\"droop\""],"label":"Drop down","run":"AllSections"}

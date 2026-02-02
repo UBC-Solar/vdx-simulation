@@ -13,7 +13,7 @@ wheelRadius = car.WheelRadius;
 
 % SolidWorks Reference Points (converted to ISO coordinates)
 swUBJstatic = [-185 625 -28.5];
-swLBJstatic = [-60 175 -9];
+swLBJstatic = [-80 175 -9];
 tp.UBJ = sw2iso(swUBJstatic);
 tp.LBJ = sw2iso(swLBJstatic);
 
