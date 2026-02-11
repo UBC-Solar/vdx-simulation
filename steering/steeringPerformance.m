@@ -29,7 +29,7 @@ steeringGeometry;
 
 % Analysis Parameters
 twoSided = false; %[control:statebutton:816f]{"position":[12,17]}
-n = 2^7; %[control:slider:24b5]{"position":[7,8]}
+n = 2^9; %[control:slider:24b5]{"position":[7,8]}
 
 % Generate Dataframe
 df = genPerformanceTable(car, sNodes, sNodesStarboard, ...
@@ -172,6 +172,74 @@ ylabel('1G Corner Maxspeed [m/s]');
 xlim([0 100]);
 title('a_c=v^2/r Result');
 grid on;
+%%
+% Plot 10: Rack Position vs Turn Radius and Max Wheel Delta
+figure;
+
+t = tiledlayout(1,1);
+ax1 = axes(t);
+ax2 = axes(t);
+
+hold(ax1, 'on');
+p1 = plot(ax1, abs(df.yokePos), max(df.radiusInner, df.radiusOuter)/1e3, '-b', ...
+    DisplayName="Outer-Front Tire Patch Radius");
+p2 = yline(ax1, 15/2, 'c--', DisplayName="U-turn Requirement (7.5m)");
+
+hold(ax2, 'on');
+p3 = plot(ax2, abs(df.rackPos), df.deltaL, '-r', DisplayName="Left Wheel \delta");
+p4 = plot(ax2, abs(df.rackPos), df.deltaR, '-g', DisplayName="Right Wheel \delta");
+
+ax1.YLim = [0 30];
+ax2.XLim = arrayfun(findRackPos, ax1.XLim);
+
+ax1.XAxisLocation = 'bottom';
+ax1.YAxisLocation = 'left';
+ax1.Color = 'none';
+ax1.Box = 'off';
+ax1.XColor = 'k'; 
+ax1.YColor = 'b';
+ax1.XGrid = 'on';
+ax2.YGrid = 'on';
+ax2.GridColor = 'k';
+
+ax2.XAxisLocation = 'top';
+ax2.YAxisLocation = 'right';
+ax2.Color = 'none';
+ax2.Box = 'off';
+ax2.XColor = 'k'; 
+ax2.YColor = 'r';
+
+xlabel(ax1, 'Yoke Angle [°] (abs)');
+ylabel(ax1, 'Turn Radius [m]');
+xlabel(ax2, 'Rack Position [mm] (abs)');
+ylabel(ax2, 'Steer Angle [°]');
+
+legend([p1, p2, p3, p4], Location='northwest');
+
+% --- Moving Line ---
+
+targetRack = 47; %[control:slider:8792]{"position":[14,16]}
+% increase `n` resolution for better interpolation
+
+val_radius = interp1(abs(df.rackPos), max(df.radiusInner, df.radiusOuter)/1e3, targetRack);
+val_deltaL = interp1(abs(df.rackPos), df.deltaL, targetRack);
+val_deltaR = interp1(abs(df.rackPos), df.deltaR, targetRack);
+val_yoke   = interp1(abs(df.rackPos), abs(df.yokePos), targetRack);
+
+xline(ax2, targetRack, '--k', HandleVisibility='off');
+plot(ax1, val_yoke, val_radius, 'ob', MarkerFaceColor='b', HandleVisibility='off');
+text(ax1, val_yoke, val_radius, sprintf('  %.2f m', val_radius), ...
+    Color='b', VerticalAlignment='bottom', FontWeight='bold');
+
+plot(ax2, targetRack, val_deltaL, 'or', MarkerFaceColor='r', HandleVisibility='off');
+text(ax2, targetRack, val_deltaL, sprintf('  %.2f°', val_deltaL), ...
+    Color='r', VerticalAlignment='bottom', FontWeight='bold');
+
+plot(ax2, targetRack, val_deltaR, 'og', MarkerFaceColor='g', HandleVisibility='off');
+text(ax2, targetRack, val_deltaR, sprintf('  %.2f°', val_deltaR), ...
+    Color='g', VerticalAlignment='bottom', FontWeight='bold');
+
+title(sprintf("Steering Configuration, Stops @ %imm", targetRack));
 
 %[appendix]{"version":"1.0"}
 %---
@@ -195,4 +263,7 @@ grid on;
 %---
 %[control:slider:24b5]
 %   data: {"defaultValue":7,"label":"Resolution (2^n)","max":12,"min":4,"run":"AllSections","runOn":"ValueChanged","step":1}
+%---
+%[control:slider:8792]
+%   data: {"defaultValue":50,"label":"Tentative Stops","max":100,"min":0,"run":"Section","runOn":"ValueChanging","step":1}
 %---
