@@ -227,9 +227,6 @@ val_deltaR = interp1(abs(df.rackPos), df.deltaR, targetRack);
 val_yoke   = interp1(abs(df.rackPos), abs(df.yokePos), targetRack);
 
 xline(ax2, targetRack, '--k', HandleVisibility='off');
-plot(ax1, val_yoke, val_radius, 'ob', MarkerFaceColor='b', HandleVisibility='off');
-text(ax1, val_yoke, val_radius, sprintf('  %.2f m', val_radius), ...
-    Color='b', VerticalAlignment='bottom', FontWeight='bold');
 
 plot(ax2, targetRack, val_deltaL, 'or', MarkerFaceColor='r', HandleVisibility='off');
 text(ax2, targetRack, val_deltaL, sprintf('  %.2f°', val_deltaL), ...
@@ -239,7 +236,11 @@ plot(ax2, targetRack, val_deltaR, 'og', MarkerFaceColor='g', HandleVisibility='o
 text(ax2, targetRack, val_deltaR, sprintf('  %.2f°', val_deltaR), ...
     Color='g', VerticalAlignment='bottom', FontWeight='bold');
 
-title(sprintf("Steering Configuration, Stops @ %imm", targetRack));
+plot(ax1, val_yoke, val_radius, 'ob', MarkerFaceColor='b', HandleVisibility='off');
+text(ax1, val_yoke, val_radius, sprintf('  %16.2f m', val_radius), ...
+    Color='b', VerticalAlignment='bottom', FontWeight='bold');
+
+title(sprintf("Steering Configuration, Stops @ %.3fmm", targetRack));
 
 %[appendix]{"version":"1.0"}
 %---
