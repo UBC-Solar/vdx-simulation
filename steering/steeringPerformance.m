@@ -20,7 +20,7 @@ clear; format shortG; close all;
 % Load shared geometry configuration
 
 
-SAvec = [-100,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,20]}
+SAvec = [-92,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,19]}
 ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
 setback = 390;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
 steeringGeometry;
@@ -218,7 +218,7 @@ legend([p1, p2, p3, p4], Location='northwest');
 
 % --- Moving Line ---
 
-targetRack = 47; %[control:slider:8792]{"position":[14,16]}
+targetRack = 41.275; %[control:slider:8792]{"position":[14,20]}
 % increase `n` resolution for better interpolation
 
 val_radius = interp1(abs(df.rackPos), max(df.radiusInner, df.radiusOuter)/1e3, targetRack);
