@@ -2,8 +2,8 @@ clear; format shortG; close all;
 
 %% Load Steering Geometry
 SAvec = [-92, 18];
-ERconnectionLen = 50;
-setback = 390;
+ERconnectionLen = 30;
+setback = 287.56;
 steeringGeometry;
 
 numPoints = 511;

@@ -21,8 +21,8 @@ clear; format shortG; close all;
 
 
 SAvec = [-92,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,19]}
-ERconnectionLen = 50;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
-setback = 390;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
+ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
+setback = 287.56;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
 steeringGeometry;
 
   %[control:button:4228]{"position":[1,2]}
@@ -196,7 +196,6 @@ ax1.XAxisLocation = 'bottom';
 ax1.YAxisLocation = 'left';
 ax1.Color = 'none';
 ax1.Box = 'off';
-ax1.XColor = 'k'; 
 ax1.YColor = 'b';
 ax1.XGrid = 'on';
 ax2.YGrid = 'on';
@@ -206,7 +205,7 @@ ax2.XAxisLocation = 'top';
 ax2.YAxisLocation = 'right';
 ax2.Color = 'none';
 ax2.Box = 'off';
-ax2.XColor = 'k'; 
+ax2.XColor = 'k';
 ax2.YColor = 'r';
 
 xlabel(ax1, 'Yoke Angle [°] (abs)');
