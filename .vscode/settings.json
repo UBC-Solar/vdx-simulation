@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "editor.mouseMiddleClickAction": "ctrlLeftClick",
+    "terminal.integrated.commandsToSkipShell": [
+        "matlab.interrupt"
+    ],
+    "MATLAB.matlabConnectionTiming": "onStart",
+    "MATLAB.telemetry": false,
+}
