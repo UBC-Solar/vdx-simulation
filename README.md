@@ -14,11 +14,8 @@ Moving forward, `vdx-simulation` has deprecated binary `.mlx` live scripts in fa
 
 All live scripts commited to the repository should first have **Clear All Output** ran in MATLAB to keep diff sizes small. In future, a pre-commit hook will be set up to lint for un-cleared output.
 
-## vdx_launch.m
-`vdx_launch.m` is a startup utility to set up your [MATLAB session path](https://www.mathworks.com/help/matlab/matlab_env/files-and-folders-that-matlab-accesses.html) to include the full repository (while excluding `sandbox/` and `indev/`). Additionally, it prints Git status info to the terminal on startup.
+## startup.m
+`startup.m` is a MATLAB [startup file](https://www.mathworks.com/help/matlab/ref/startup.html) that automatically runs when MATLAB is launched from the repository root. It seamlessly sets up your [session path](https://www.mathworks.com/help/matlab/matlab_env/files-and-folders-that-matlab-accesses.html) to include to include cetain folders. It also runs fetches remote and prints `git status` on startup for convenience.
 
-To configure it as intended, set up a Windows desktop shortcut with the following:
-> **Target:** `matlab -r "run('vdx_launch.m')"`  
-> **Start In:** `C:/Users/YOUR_REPO_DIR`
-
-Each time you launch MATLAB from this shortcut, you will be greeted as having entered the VDX workspace—indicating that your path is set up!
+> [!IMPORTANT]
+> Many scripts rely on dependencies in this repository, and expect them to be on your session path. As such, downloading individual scripts and attempting to run them will be unlikely to work. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the whole repository.
