@@ -1,10 +1,12 @@
 %% MAIN SCRIPT TO CALCULATE HARDPOINT FORCES %%
 clear, close, clc, % clears workspace, closes figures, clears terminal,
 
-% Taken from SW VDX Skeleton and CG Estimate from Alex (Sept. 2025)
-totalMass = 354.37; %kg
-wheelBase = 2750; %mm
-COM = [128.91, 439.31, -84.24];
+% Values measured on the CG estimate by Munro (March 2026)
+totalMass = 350; %kg
+wheelBase = 2600; %mm
+COM = [159.807, 400.712, -75.748];
+
+verifyCarConstants(totalMass, wheelBase, COM);
 
 %%%%%% Set Loading Condition here! %%%%%%
 % regs: 2g bump, 1g brake, 1g corner
@@ -24,7 +26,7 @@ corner = "FL";
 if loading.turnDirection == 1
     disp("***Turning Right***")
 elseif loading.turnDirection == -1
-        disp("***Turning Left***")
+    disp("***Turning Left***")
 else
     error("Invalid Turn Direction. Left: -1, Right: 1")
 end
@@ -112,7 +114,7 @@ function copyForceTableForGoogleDocs(struct)
     end
 
     % Combine header + rows with newline characters
-    outputText = header + strjoin(rows, '\n');  
+    outputText = header + strjoin(rows, '\n');
 
     % Convert to char for clipboard
     clipboard('copy', char(outputText));
@@ -141,9 +143,3 @@ function s = insertCommas(str)
         end
     end
 end
-
-
-
-
-
-

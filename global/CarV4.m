@@ -9,11 +9,11 @@ classdef CarV4 < SolarCar
         Name = 'Cascadia'
         Wheelbase = 2600                % mm
         Trackwidth = 1270               % mm
-        RawMass = 220                   % kg
+        RawMass = 270                   % kg
         MinDriverMass = 80              % kg
-        CoGx = 0.4694                   % along wheelbase
-        CoGy = 0.6015                   % along trackwidth
-        CoGh = 439.31                   % mm
+        CoGx = 0.4709                   % along wheelbase (ratio)
+        CoGy = 0.6258                   % along trackwidth (ratio)
+        CoGh = 400.71                   % mm
 
         % Motor
         NominalMotorPower = 1470        % W
