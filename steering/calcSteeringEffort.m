@@ -79,20 +79,20 @@ for i = 1:numPoints
         t_p_L = max(0, maxPneumaticTrail - pneumaticTrailSensitivity * abs(Fy_L));
         t_p_R = max(0, maxPneumaticTrail - pneumaticTrailSensitivity * abs(Fy_R));
 
-        % 3D pos force acts on tire patch
+        % Pneumatic trail shifts where Fy (lateral force) acts
+        % Fy acts behind the contact centre by t_p (self-aligning torque mechanism)
+        % Fz acts at the nominal tire patch contact point
         CoP_L = dNodesPort.TP - wheelHeadL * t_p_L;
         CoP_R = dNodesStbd.TP - wheelHeadR * t_p_R;
-
-        % Combined tire force vector
-        Fvec_L = Fy_L * wheelLatL + Fz_L * [0; 0; 1];
-        Fvec_R = Fy_R * wheelLatR + Fz_R * [0; 0; 1];
 
         % Moments about kingpins
         % Cross Product finds the total 3D torque around the pivot point
         % Dot Product projects that torque onto the kingpin axis
         % Note: r vector can originate at any point along KP axis, gets cancelled out
-        Mkp_L = dot(cross(CoP_L - dNodesPort.LBJ, Fvec_L), KP_axis_L);
-        Mkp_R = dot(cross(CoP_R - dNodesStbd.LBJ, Fvec_R), KP_axis_R);
+        Mkp_L = dot(cross(CoP_L - dNodesPort.LBJ, Fy_L * wheelLatL), KP_axis_L) ...
+            + dot(cross(dNodesPort.TP - dNodesPort.LBJ, Fz_L * [0; 0; 1]), KP_axis_L);
+        Mkp_R = dot(cross(CoP_R - dNodesStbd.LBJ, Fy_R * wheelLatR), KP_axis_R) ...
+            + dot(cross(dNodesStbd.TP - dNodesStbd.LBJ, Fz_R * [0; 0; 1]), KP_axis_R);
 
         % Resulting axial force in tie rods (counter tire moment)
         TRvec_L = dNodesPort.ER_TR - dNodesPort.SA_TR;
@@ -107,6 +107,14 @@ for i = 1:numPoints
         % Axial forces in tie rods (scalar magnitude)
         Ftr_L = -Mkp_L / tauL;  % [N]
         Ftr_R = -Mkp_R / tauR;  % [N]
+
+        % Save static forces for printing
+        if j == 1 && abs(df.rackPos(i)) < 1e-4
+            staticFtrPort = Ftr_L;
+            staticFtrStbd = Ftr_R;
+            staticFtr_L_vec = Ftr_L * TRvec_L;
+            staticFtr_R_vec = Ftr_R * TRvec_R;
+        end
 
         % Resulting axial forces in the extension rod/rack
         Frack_L = -Ftr_L * TRvec_L(2);
@@ -172,3 +180,11 @@ plot(kph, bushingNzMatrix(idxR, :), '_b', MarkerSize=16, LineWidth=4, DisplayNam
 legend(Location='northeast');
 
 disp("Complete!");
+
+%% Display Static Tie Rod Forces and Vectors
+fprintf('\n--- Static Tie Rod Forces (Rack Centred) ---\n');
+fprintf('(+) = Tension, (-) = Compression, [SW Vector]\n\n');
+fprintf('Port: %+.2f N\n', staticFtrPort);
+fprintf('\t[%g, %g, %g]\n', iso2sw(staticFtr_L_vec').');
+fprintf('Starboard: %+.2f N\n', staticFtrStbd);
+fprintf('\t[%g, %g, %g]\n', iso2sw(staticFtr_R_vec').');
