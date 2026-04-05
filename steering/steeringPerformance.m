@@ -22,7 +22,7 @@ clear; format shortG; close all;
 
 SAvec = [-92,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4e3c]{"position":[9,19]}
 ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:209a]{"position":[19,21]}
-setback = 287.56;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
+setback = 397.20;              % X distance, ER axis to WC %[control:editfield:9564]{"position":[11,14]}
 steeringGeometry;
 
   %[control:button:4228]{"position":[1,2]}
