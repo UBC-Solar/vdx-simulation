@@ -12,21 +12,18 @@ C = car.Cfactor;
 wheelRadius = car.WheelRadius;
 
 % SolidWorks Reference Points (converted to ISO coordinates)
-swUBJstatic = [-185 625 -15.2];
-swLBJstatic = [-80 175 4.8];
+swUBJstatic = [-185 610 -15.04];
+swLBJstatic = [-80 175 4.96];
 tp.UBJ = sw2iso(swUBJstatic);
 tp.LBJ = sw2iso(swLBJstatic);
 
 % Flexible Steering Linkage Parameters
-ERz = 615;                  % Extension rod Z height [mm]
-SAz0 = 680;                 % Steering arm Z height [mm]
-%SAvec = [0 0];             % Steering arm offset [X-inset, Y-inset] [mm]
-%setback = 0;               % X distance, ER axis to WC [mm]
-%ERconnectionLen = 0;       % Extension rod connection length [mm]
-assert(exist('SAvec', 'var') && ...
-    exist('setback', 'var') && ...
-    exist('ERconnectionLen', 'var'), ...
-    'Steering parameters missing :/');
+ERz = 695.58;                  % Extension rod Z height [mm]
+SAz0 = 650;                 % Steering arm Z height [mm]
+setback = 520;           % X distance, ER axis to WC [mm]
+ERconnectionLen = 30;       % Extension rod connection length [mm]
+%SAvec = [0 0];             % Steering arm offset (from extended KP axis) [X-inset, Y-inset] [mm]
+assert(exist('SAvec', 'var'), "Steering parameters missing :/");
 
 %% Linkage Calculation
 

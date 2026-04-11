@@ -10,9 +10,7 @@
 %% Initialize Geometry
 clear; format shortG; close all;
 
-SAvec = [-92,  18];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,19]}
-ERconnectionLen = 30;      % Extension rod connection length %[control:editfield:945c]{"position":[19,21]}
-setback = 397.20;              % X distance, ER axis to WC %[control:editfield:0c75]{"position":[11,14]}
+SAvec = [-75,  35];         % Steering arm offset [X-inset, Y-inset] %[control:editfield:4126]{"position":[9,19]}
 
   %[control:button:85d2]{"position":[1,2]}
 
@@ -247,17 +245,11 @@ end
 %[control:editfield:4126]
 %   data: {"defaultValue":"0","label":"Steering arm offset [X-inset, Y-inset]","run":"Nothing","valueType":"MATLAB code"}
 %---
-%[control:editfield:945c]
-%   data: {"defaultValue":0,"label":"Extension rod connection length","run":"Nothing","valueType":"Double"}
-%---
-%[control:editfield:0c75]
-%   data: {"defaultValue":0,"label":"X distance, ER axis to WC","run":"Nothing","valueType":"Double"}
-%---
 %[control:button:85d2]
 %   data: {"label":"Run","run":"AllSections"}
 %---
 %[control:slider:679b]
-%   data: {"defaultValue":0,"label":"Yoke Position","max":206.6,"maxLinkedVariable":"maxYoke","min":-206.6,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
+%   data: {"defaultValue":0,"label":"Yoke Position","max":214.1,"maxLinkedVariable":"maxYoke","min":-214.1,"minLinkedVariable":"maxYokeNeg","run":"AllSections","runOn":"ValueChanged","step":0.1}
 %---
 %[control:dropdown:1b3d]
 %   data: {"defaultValue":"\"static\"","itemLabels":["bump","static","droop"],"items":["\"bump\"","\"static\"","\"droop\""],"label":"Drop down","run":"AllSections"}
